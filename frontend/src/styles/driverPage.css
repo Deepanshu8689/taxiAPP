@@ -1,0 +1,118 @@
+.driver-dashboard {
+  min-height: 100vh;
+  background-color: #f9fafb;
+  padding: 40px;
+  font-family: "Inter", sans-serif;
+}
+
+.dashboard-title {
+  font-size: 28px;
+  font-weight: 700;
+  margin-bottom: 25px;
+  color: #222;
+  text-align: center;
+}
+
+.no-rides {
+  color: #666;
+  text-align: center;
+  font-size: 16px;
+  margin-top: 50px;
+}
+
+.rides-container {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 20px;
+}
+
+.ride-card {
+  background: #fff;
+  border-radius: 16px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  padding: 20px;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.ride-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.15);
+}
+
+.ride-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.pickup {
+  font-size: 18px;
+  font-weight: 600;
+  color: #111;
+}
+
+.ride-status {
+  padding: 4px 10px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.ride-status.accepted {
+  background-color: #fff3cd;
+  color: #856404;
+}
+
+.ride-status.started {
+  background-color: #cce5ff;
+  color: #004085;
+}
+
+.ride-status.completed {
+  background-color: #d4edda;
+  color: #155724;
+}
+
+.ride-card p {
+  font-size: 14px;
+  color: #444;
+  margin: 5px 0;
+}
+
+.ride-actions {
+  margin-top: 15px;
+  display: flex;
+  gap: 10px;
+}
+
+.btn {
+  flex: 1;
+  border: none;
+  border-radius: 8px;
+  padding: 10px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s ease, transform 0.1s ease;
+}
+
+.btn.start {
+  background-color: #007bff;
+  color: #fff;
+}
+
+.btn.start:hover {
+  background-color: #0069d9;
+  transform: translateY(-1px);
+}
+
+.btn.complete {
+  background-color: #28a745;
+  color: #fff;
+}
+
+.btn.complete:hover {
+  background-color: #218838;
+  transform: translateY(-1px);
+}

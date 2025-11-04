@@ -1,0 +1,55 @@
+.searching-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100vh;
+  background: linear-gradient(135deg, #ffcc00 0%, #ff9900 100%);
+  color: #222;
+  text-align: center;
+  font-family: "Poppins", sans-serif;
+}
+
+.loader {
+  border: 8px solid rgba(255, 255, 255, 0.3);
+  border-top: 8px solid #fff;
+  border-radius: 50%;
+  width: 100px;
+  height: 100px;
+  animation: spin 1.2s linear infinite;
+  margin-bottom: 20px;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+h2 {
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin-bottom: 10px;
+}
+
+p {
+  color: #333;
+  font-size: 0.95rem;
+  margin-bottom: 30px;
+}
+
+.cancel-btn {
+  background: #fff;
+  color: #222;
+  border: none;
+  padding: 12px 30px;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease-in;
+}
+
+.cancel-btn:hover {
+  background: #222;
+  color: #fff;
+}
