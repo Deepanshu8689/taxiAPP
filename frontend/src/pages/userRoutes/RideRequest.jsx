@@ -1,10 +1,10 @@
 import { useContext, useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import "./../styles/rideRequest.css";
+import "../../styles/rideRequest.css";
 import { useDispatch, useSelector } from "react-redux";
-import { removeUser } from "../utils/userSlice";
-import { addRide } from "../utils/rideSlice";
-import { createSocketConnection } from "../socket";
+import { removeUser } from "../../utils/Redux/userSlice";
+import { addRide } from "../../utils/Redux/rideSlice";
+import { createSocketConnection } from "../../utils/Socket/socket";
 
 export default function RideRequest() {
   const socketRef = useRef(null);

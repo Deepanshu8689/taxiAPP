@@ -1,10 +1,10 @@
 import React, { useContext, useEffect, useRef, useState } from 'react'
-import { createSocketConnection } from '../socket'
+import { createSocketConnection } from '../../utils/Socket/socket'
 import { useNavigate } from 'react-router-dom'
 import { useDispatch, useSelector } from 'react-redux'
-import { removeUser } from '../utils/userSlice'
-import "../styles/driverPage.css"
-import { addRide, removeRideFromFeed } from '../utils/rideSlice'
+import { removeUser } from '../../utils/Redux/userSlice'
+import "../../styles/driverPage.css"
+import { addRide, removeRideFromFeed } from '../../utils/Redux/rideSlice'
 
 const DriverPage = () => {
     const user = useSelector((store) => store.user)

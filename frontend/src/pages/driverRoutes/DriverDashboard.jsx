@@ -1,9 +1,9 @@
 import React, { useContext, useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import "./../styles/driverDashboard.css";
+import "../../styles/driverDashboard.css";
 import { AlertCircle, Clock, IndianRupee, MapPin, Navigation, Phone, User } from 'lucide-react'
 // import { AuthContext } from '../context/AuthContext';
-import { createSocketConnection } from '../socket';
+import { createSocketConnection } from '../../utils/Socket/socket';
 import { useSelector } from 'react-redux';
 
 const DriverDashboard = () => {

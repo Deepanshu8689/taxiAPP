@@ -1,8 +1,8 @@
 import { useContext, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import "../styles/login.css";
+import "../../styles/login.css";
 import { useDispatch } from "react-redux";
-import { addUser } from "../utils/userSlice";
+import { addUser } from "../../utils/Redux/userSlice";
 
 export default function Login() {
     // const navigate = useNavigate();
@@ -94,7 +94,7 @@ export default function Login() {
 
                     <form onSubmit={handleSubmit} className="login-form">
                         <div className="form-group">
-                            <label htmlFor="email">Email</label>
+                            <label htmlFor="email">EmailId</label>
                             <input
                                 id="email"
                                 type="email"
@@ -127,7 +127,7 @@ export default function Login() {
                     <div className="login-footer">
                         <p>
                             Don't have an account?{" "}
-                            <span onClick={() => navigate("/")} className="link">
+                            <span onClick={() => navigate("/signup")} className="link">
                                 Sign Up
                             </span>
                         </p>

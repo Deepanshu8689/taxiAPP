@@ -1,9 +1,9 @@
 import React, { useContext, useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { createSocketConnection } from '../socket'
-import "./../styles/searchingRide.css";
+import { createSocketConnection } from '../../utils/Socket/socket'
+import "../../styles/searchingRide.css";
 import { useDispatch, useSelector } from 'react-redux';
-import { addRide } from '../utils/rideSlice';
+import { addRide } from '../../utils/Redux/rideSlice';
 
 const SearchingRide = () => {
   const navigate = useNavigate()

@@ -5,7 +5,7 @@ import App from './App.jsx'
 import { BrowserRouter } from 'react-router-dom'
 import { Provider } from 'react-redux'
 import AuthProvider from './authProvider.jsx'
-import appStore from './utils/appStore.jsx'
+import appStore from './utils/Redux/appStore.jsx'
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>

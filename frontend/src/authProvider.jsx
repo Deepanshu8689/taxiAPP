@@ -1,6 +1,6 @@
 import { useDispatch } from "react-redux";
 import { useEffect, useState } from "react";
-import { addUser, removeUser } from "./utils/userSlice";
+import { addUser, removeUser } from "./utils/Redux/userSlice";
 
 export default function AuthProvider({ children }) {
   const dispatch = useDispatch();

@@ -1,6 +1,6 @@
 import React from 'react'
 import { useNavigate } from 'react-router-dom'
-import '../styles/homepage.css'
+import '../../styles/homepage.css'
 
 const HomePage = () => {
   const navigate = useNavigate()
@@ -39,7 +39,7 @@ const HomePage = () => {
           <div className="auth-buttons">
             <button 
               className="btn-primary" 
-              onClick={() => navigate('/')}
+              onClick={() => navigate('/signup')}
             >
               Sign Up
             </button>

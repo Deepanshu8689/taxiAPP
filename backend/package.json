@@ -37,6 +37,7 @@
     "dotenv": "^17.2.3",
     "mongoose": "^8.19.2",
     "multer": "^2.0.2",
+    "node": "^25.1.0",
     "node-geocoder": "^4.4.1",
     "nodemailer": "^7.0.10",
     "otp-generator": "^4.0.1",
