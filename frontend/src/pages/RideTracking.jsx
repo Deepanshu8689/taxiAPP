@@ -1,15 +1,19 @@
 import React, { useContext, useEffect, useReducer, useRef, useState } from 'react'
 // import { AuthContext } from '../context/AuthContext'
 import { createSocketConnection } from '../socket'
+import { useSelector } from 'react-redux'
+import { useNavigate } from 'react-router-dom'
 
 const RideTracking = () => {
-  
-  const acceptedRide = useSelector((store) => store.ride)
+
   const [ride, setRide] = useState(null)
-  setRide(acceptedRide)
   const [distance, setDistance] = useState(0)
   const [duration, setDuration] = useState(0)
   const socketRef = useRef(null)
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState(null)
+  const navigate = useNavigate()
+  const user = useSelector((store) => store.user)
 
   useEffect(() => {
     const socket = createSocketConnection()
@@ -30,36 +34,51 @@ const RideTracking = () => {
 
   }, [])
 
-
   const getAcceptedRide = async () => {
+    setLoading(true)
     try {
+
+      setError(null)
       const res = await fetch("http://localhost:3000/ride/acceptedRide", {
         credentials: "include"
       })
+      // console.log("res: ", res)
+      if (!res.ok) throw new Error("failed to fetch acceptedRide")
 
       const data = await res.json()
-      if (!res.ok) throw new Error(data.message || "Ride request failed")
-      console.log("data: ", data.ride)
-      // console.log("acceptedRide: ", acceptedRide)
-      setRide(data.ride || acceptedRide)
+      if (!data.ride) {
+        navigate('/driver-homepage')
+        return
+      }
+      setRide(data.ride)
+      console.log("ride in getAcceptedRide: ", ride)
 
-      const { driver, vehicleType, pickupLat, pickupLng } = data.ride || acceptedRide
-
+      const { driver, vehicleType, pickupLat, pickupLng } = data.ride
       const { latitude: lat2, longitude: long2 } = driver
-      console.log("heloooooooooo")
-
-      const resDisatnce = await fetch(`http://localhost:3000/ride/currentDistance/${vehicleType}/${pickupLat}/${pickupLng}/${lat2}/${long2}`, {
+      console.log("driver: ", driver)
+      const resDistance = await fetch(`http://localhost:3000/ride/currentDistance/${vehicleType}/${pickupLat}/${pickupLng}/${lat2}/${long2}`, {
         credentials: "include"
       })
 
-      const { distance, duration } = await resDisatnce.json()
-      setDistance(distance)
-      setDuration(duration)
+
+      if (resDistance.ok) {
+        const { distance, duration } = await resDistance.json()
+        console.log("distance and duration: ", distance, duration)
+        setDistance(distance)
+        setDuration(duration)
+      }
+      else {
+        console.error("Failed to fetch distance and duration")
+      }
+
 
     } catch (error) {
-      console.log("error in getAcceptedRide: ", error)
-
+      console.error("Error in getAcceptedRide:", error)
+      setError(error.message)
+    } finally {
+      setLoading(false)
     }
+
   }
   return (
 

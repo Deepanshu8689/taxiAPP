@@ -43,8 +43,8 @@ const DriverDashboard = () => {
             })
             // console.log("res: ", res)
             if (!res.ok) throw new Error("failed to fetch acceptedRide")
+
             const data = await res.json()
-            console.log("data in getAcceptedRide: ", data)
             if (!data.ride) {
                 navigate('/driver-homepage')
                 return
@@ -53,6 +53,7 @@ const DriverDashboard = () => {
 
             const { driver, vehicleType, pickupLat, pickupLng } = data.ride
             const { latitude: lat2, longitude: long2 } = driver
+            console.log("driver: ", driver)
             const resDistance = await fetch(`http://localhost:3000/ride/currentDistance/${vehicleType}/${pickupLat}/${pickupLng}/${lat2}/${long2}`, {
                 credentials: "include"
             })
@@ -60,8 +61,12 @@ const DriverDashboard = () => {
 
             if (resDistance.ok) {
                 const { distance, duration } = await resDistance.json()
+                console.log("distance and duration: ", distance, duration)
                 setDistance(distance)
                 setDuration(duration)
+            }
+            else{
+                console.error("Failed to fetch distance and duration")
             }
 
 
@@ -194,7 +199,7 @@ const DriverDashboard = () => {
                         <div className="distance-right">
                             <div className="time-info">
                                 <Clock className="time-icon" />
-                                <p className="time-value">{Math.round(duration)} min</p>
+                                <p className="time-value">{duration} min</p>
                             </div>
                             <p className="time-label">estimated time</p>
                         </div>
