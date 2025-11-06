@@ -48,4 +48,16 @@ export class RideService {
     async finalizeEarningforRide(rideId: string, paymentMethod: string){
         return await this.rideRepo.finalizeEarningforRide(rideId, paymentMethod)
     }
+
+    async getRideById(id: string){
+        return await this.rideRepo.getRideById(id)
+    }
+
+    async getAllRequestedRides(){
+        return await this.rideRepo.getAllRequestedRides()
+    }
+
+    async getRequestedRide(userId: string){
+        return await this.rideRepo.getRequestedRide(userId)
+    }
 }

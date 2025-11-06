@@ -9,11 +9,13 @@ import { AuthModule } from './modules/auth/auth.module';
 import { DriverModule } from './modules/driver/driver.module';
 import { AdminModule } from './modules/admin/admin.module';
 import { NotificationController } from './modules/notification/notification.controller';
-import { PaymentController } from './modules/payment/payment.controller';
 import { RideModule } from './modules/ride/ride.module';
 import { CommonService } from './modules/common/common.service';
 import { WalletModule } from './modules/wallet/wallet.module';
 import { PayoutModule } from './modules/payout/payout.module';
+import { PaymentModule } from './modules/payment/payment.module';
+import { SocketModule } from './modules/socket/socket.module';
+import { SocketService } from './modules/socket/socket.service';
 
 @Module({
   imports: [
@@ -43,9 +45,10 @@ import { PayoutModule } from './modules/payout/payout.module';
     RideModule,
     WalletModule,
     PayoutModule,
-    
+    PaymentModule,
+    SocketModule,
   ],
-  controllers: [AppController, NotificationController, PaymentController],
+  controllers: [AppController, NotificationController],
   providers: [AppService, CommonService],
 })
 export class AppModule {}

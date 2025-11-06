@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import * as NodeGeocoder from 'node-geocoder';
+import NodeGeocoder from 'node-geocoder';
 
 @Injectable()
 export class CommonService {

@@ -1,26 +1,43 @@
-import { useContext, useEffect, useState } from "react";
+import { useContext, useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "./../styles/rideRequest.css";
 import { useDispatch, useSelector } from "react-redux";
 import { removeUser } from "../utils/userSlice";
+import { addRide } from "../utils/rideSlice";
+import { createSocketConnection } from "../socket";
 
 export default function RideRequest() {
-  const user = useSelector((store) => store.user)
-  const dispatch = useDispatch()
+  const socketRef = useRef(null);
+
+  const user = useSelector((store) => store.user);
+  const dispatch = useDispatch();
   const navigate = useNavigate();
+
   const [pickupLocation, setPickupLocation] = useState("");
   const [dropLocation, setDropLocation] = useState("");
   const [fares, setFares] = useState([]);
   const [requestData, setRequestData] = useState({});
   const [loading, setLoading] = useState(false);
+  const [locationLoading, setLocationLoading] = useState(false)
 
+  useEffect(() => {
+    if (!user) {
+      console.log("No user found, redirecting to login");
+    };
+    
+    const socket = createSocketConnection();
+    socketRef.current = socket;
+    getRequestedRide()
+    
+  }, [])
 
   const locationHandler = async (e) => {
     e.preventDefault()
+    setLocationLoading(true);
     try {
 
       if (!navigator.geolocation) {
-        console.log("Geolocation is not supported by this browser.")
+        alert("Geolocation is not supported by this browser.")
         return
       }
 
@@ -39,13 +56,16 @@ export default function RideRequest() {
             }
           )
 
-          const data = await res.json()
-          console.log("data: ", data)
+          await res.json()
+          alert("Location updated successfully")
         }
       )
     } catch (error) {
-      console.log("error in locationHandler: ", error)
-      throw error
+      console.error("Error in locationHandler:", error);
+      alert("Failed to update location");
+    }
+    finally {
+      setLocationLoading(false);
     }
   }
 
@@ -54,11 +74,12 @@ export default function RideRequest() {
     try {
 
       const res = await fetch("http://localhost:3000/auth/logout", {
-        method: "Post"
+        method: "Post",
+        credentials: "include",
       })
 
       dispatch(removeUser())
-      navigate('/login')
+      navigate('/')
 
     } catch (error) {
       console.log("error in logoutHandler: ", error)
@@ -69,24 +90,16 @@ export default function RideRequest() {
   const bookRideHandler = async (fare) => {
 
     try {
-      const estimatedFare = fare.estimatedFare
-      const vehicleType = fare.vehicleType
-      const distance = requestData.distance
-      const pickupLat = requestData.pickUpCoords.latitude
-      const pickupLng = requestData.pickUpCoords.longitude
-      const dropLat = requestData.dropCoords.latitude
-      const dropLng = requestData.pickUpCoords.latitude
-
       const body = {
         pickupLocation,
         dropLocation,
-        vehicleType,
-        distance,
-        estimatedFare,
-        pickupLat,
-        pickupLng,
-        dropLat,
-        dropLng
+        vehicleType: fare.vehicleType,
+        distance: requestData.distance,
+        estimatedFare: fare.estimatedFare,
+        pickupLat: requestData.pickUpCoords.latitude,
+        pickupLng: requestData.pickUpCoords.longitude,
+        dropLat: requestData.dropCoords.latitude,
+        dropLng: requestData.dropCoords.longitude
       }
 
       const res = await fetch("http://localhost:3000/ride/requestRide", {
@@ -98,23 +111,44 @@ export default function RideRequest() {
         body: JSON.stringify(body)
       })
 
-      const data = await res.json()
+      const createdRide = await res.json()
       if (!res.ok) throw new Error(data.message || "Ride request failed");
-      
-      dispatch(addRide(data))
-      
+
+      dispatch(addRide(createdRide))
+      socketRef.current.emit('BE-request-ride', createdRide)
+
       navigate('/searching-ride')
     } catch (error) {
       console.log("error in bookRideHandler: ", error)
-      throw error
+      alert(error.message)
     }
 
+  }
+
+  const getRequestedRide = async () => {
+    try {
+      const res = await fetch("http://localhost:3000/ride/getRequestedRide", {
+        credentials: "include"
+      })
+  
+      const data = await res.json()
+      console.log("data in getRequestedRide: ", data)
+      if(!data.success){
+        console.log("No requested ride found, proceed to book a ride")
+      }
+      else{
+        navigate('/searching-ride')
+      }
+
+    } catch (error) {
+      console.log("error in getRequestedRide: ", error)
+    }
   }
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!pickupLocation || !dropLocation) {
-      alert("Enter both pickup and dropoff locations");
+      alert("Enter both pickup and drop locations");
       return;
     }
 
@@ -133,8 +167,9 @@ export default function RideRequest() {
       });
 
       const data = await res.json();
-      console.log("data: ", data)
+
       if (!res.ok) throw new Error(data.message || "Ride request failed");
+
       if (data.length === 0) {
         alert("No rides available")
         setFares([])
@@ -144,6 +179,7 @@ export default function RideRequest() {
 
       setFares(data.fares)
       setRequestData(data)
+
     } catch (err) {
       console.error(err);
       alert(err.message);
@@ -153,61 +189,116 @@ export default function RideRequest() {
   };
 
   return (
-    <div className="ride-request-container">
-      <div>
-        {user && <h2>{user.emailId}</h2>}
+    <div className="ride-request-page">
+      {/* Header */}
+      <div className="request-header">
+        <div className="user-info">
+          <div className="user-avatar">
+            {user?.firstName?.charAt(0) || "U"}
+          </div>
+          <div>
+            <p className="user-name">
+              {user?.firstName} {user?.lastName}
+            </p>
+            <p className="user-email">{user?.emailId}</p>
+          </div>
+        </div>
+
+        <div className="header-actions">
+          <button
+            className="icon-btn"
+            onClick={locationHandler}
+            disabled={locationLoading}
+            title="Update Location"
+          >
+            📍
+          </button>
+          <button
+            className="icon-btn logout-btn"
+            onClick={logoutHandler}
+            title="Logout"
+          >
+            🚪
+          </button>
+        </div>
       </div>
-      <div>
-        <button onClick={logoutHandler}>
-          Logout
-        </button>
-        <button onClick={locationHandler}>
-          CurrentLocation
-        </button>
 
-      </div>
-      <h2>Request a Ride</h2>
-      <form onSubmit={handleSubmit}>
-        <input
-          type="text"
-          placeholder="Pickup location"
-          value={pickupLocation}
-          onChange={(e) => setPickupLocation(e.target.value)}
-          required
-        />
-        <input
-          type="text"
-          placeholder="Drop location"
-          value={dropLocation}
-          onChange={(e) => setDropLocation(e.target.value)}
-          required
-        />
+      {/* Main Content */}
+      <div className="request-content">
+        <div className="request-card">
+          <h2>Where to?</h2>
+          <p className="request-subtitle">Enter your journey details</p>
 
-        <button type="submit" disabled={loading}>
-          {loading ? "Requesting..." : "Request Ride"}
-        </button>
-      </form>
-
-      <div className="fare-list">
-        {fares.length > 0 &&
-          fares.map((fare, index) => (
-            <div key={index} className="fare-card">
-              <div className="fare-info">
-                <div className="fare-vehicle">
-                  <h4>{fare.vehicleType}</h4>
-                  <p className="fare-time">ETA: {fare.durationMin}</p>
-                </div>
-                <button
-                  className="fare-price-btn"
-                  onClick={() => bookRideHandler(fare)}
-                >
-                  ₹{fare.estimatedFare}
-                </button>
+          <form onSubmit={handleSubmit} className="location-form">
+            <div className="input-group">
+              <div className="input-icon pickup-icon">
+                <div className="icon-dot"></div>
               </div>
+              <input
+                type="text"
+                placeholder="Pickup location"
+                value={pickupLocation}
+                onChange={(e) => setPickupLocation(e.target.value)}
+                required
+              />
             </div>
-          ))}
-      </div>
 
+            <div className="location-divider"></div>
+
+            <div className="input-group">
+              <div className="input-icon drop-icon">
+                <div className="icon-square"></div>
+              </div>
+              <input
+                type="text"
+                placeholder="Drop location"
+                value={dropLocation}
+                onChange={(e) => setDropLocation(e.target.value)}
+                required
+              />
+            </div>
+
+            <button type="submit" className="search-btn" disabled={loading}>
+              {loading ? "Searching..." : "Search Rides"}
+            </button>
+          </form>
+        </div>
+
+        {/* Fare Options */}
+        {fares.length > 0 && (
+          <div className="fares-section">
+            <h3>Choose a ride</h3>
+            <div className="fare-list">
+              {fares.map((fare, index) => (
+                <div key={index} className="fare-card">
+                  <div className="fare-left">
+                    <div className="vehicle-icon">
+                      {fare.vehicleType === "bike" ? "🏍️" :
+                        fare.vehicleType === "auto" ? "🛺" : "🚗"}
+                    </div>
+                    <div className="fare-details">
+                      <h4>{fare.vehicleType}</h4>
+                      <p className="fare-eta">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                          <circle cx="12" cy="12" r="10" />
+                          <polyline points="12 6 12 12 16 14" />
+                        </svg>
+                        {fare.durationMin} away
+                      </p>
+                    </div>
+                  </div>
+                  <button
+                    className="book-btn"
+                    onClick={() => bookRideHandler(fare)}
+                  >
+                    ₹{fare.estimatedFare}
+                  </button>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+      </div>
     </div>
   );
 }

@@ -1,13 +1,12 @@
 import React, { useContext, useEffect, useReducer, useRef, useState } from 'react'
-import { AuthContext } from '../context/AuthContext'
+// import { AuthContext } from '../context/AuthContext'
 import { createSocketConnection } from '../socket'
 
-const RideTracking = ({ acceptedRide }) => {
-  const { user } = useContext(AuthContext)
-
-  // console.log("acceptedRide in the ride tracking page: ", acceptedRide)
-
-  const [ride, setRide] = useState(acceptedRide)
+const RideTracking = () => {
+  
+  const acceptedRide = useSelector((store) => store.ride)
+  const [ride, setRide] = useState(null)
+  setRide(acceptedRide)
   const [distance, setDistance] = useState(0)
   const [duration, setDuration] = useState(0)
   const socketRef = useRef(null)
@@ -17,8 +16,6 @@ const RideTracking = ({ acceptedRide }) => {
     socketRef.current = socket
 
     getAcceptedRide()
-
-    socketRef.current.emit('register', user)
 
     socketRef.current.on('FE-update-distance', (data) => {
       const { distance, duration, ride } = data

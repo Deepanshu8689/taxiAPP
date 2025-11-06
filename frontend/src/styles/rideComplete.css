@@ -1,0 +1,400 @@
+/* Container */
+.ride-complete {
+  min-height: 100vh;
+  background-color: #f5f5f5;
+  padding: 20px;
+  max-width: 500px;
+  margin: 0 auto;
+}
+
+/* Loading */
+.complete-loading {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background-color: #f5f5f5;
+}
+
+.complete-loading .spinner {
+  width: 40px;
+  height: 40px;
+  border: 3px solid #e0e0e0;
+  border-top-color: #4caf50;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+.complete-loading p {
+  margin-top: 16px;
+  color: #666;
+  font-size: 14px;
+}
+
+/* Error */
+.complete-error {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background-color: #f5f5f5;
+  padding: 20px;
+  text-align: center;
+}
+
+.complete-error p {
+  color: #666;
+  margin-bottom: 20px;
+  font-size: 16px;
+}
+
+.complete-error button {
+  background-color: #4caf50;
+  color: #fff;
+  border: none;
+  padding: 12px 24px;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+/* Header */
+.complete-header {
+  text-align: center;
+  margin-bottom: 24px;
+}
+
+.success-icon {
+  margin-bottom: 16px;
+  display: inline-block;
+}
+
+.complete-header h1 {
+  font-size: 24px;
+  font-weight: 600;
+  color: #333;
+  margin: 0 0 8px 0;
+}
+
+.complete-subtitle {
+  font-size: 14px;
+  color: #999;
+  margin: 0;
+}
+
+/* Fare Card */
+.fare-card {
+  background: linear-gradient(135deg, #4caf50 0%, #45a049 100%);
+  border-radius: 16px;
+  padding: 32px 24px;
+  text-align: center;
+  margin-bottom: 20px;
+  box-shadow: 0 4px 12px rgba(76, 175, 80, 0.3);
+}
+
+.fare-amount {
+  display: flex;
+  align-items: baseline;
+  justify-content: center;
+  margin-bottom: 8px;
+}
+
+.currency {
+  font-size: 28px;
+  font-weight: 600;
+  color: #fff;
+  margin-right: 4px;
+}
+
+.amount {
+  font-size: 48px;
+  font-weight: 700;
+  color: #fff;
+}
+
+.fare-label {
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.9);
+  margin: 0;
+}
+
+/* Ride Summary */
+.ride-summary {
+  background-color: #fff;
+  border-radius: 12px;
+  padding: 20px;
+  margin-bottom: 16px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.ride-summary h2 {
+  font-size: 16px;
+  font-weight: 600;
+  color: #333;
+  margin: 0 0 16px 0;
+}
+
+.summary-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 0;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.summary-row:last-child {
+  border-bottom: none;
+  padding-bottom: 0;
+}
+
+.summary-icon {
+  width: 40px;
+  height: 40px;
+  background-color: #f5f5f5;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.summary-content {
+  flex: 1;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.summary-label {
+  font-size: 14px;
+  color: #666;
+}
+
+.summary-value {
+  font-size: 14px;
+  font-weight: 600;
+  color: #333;
+}
+
+/* Trip Details */
+.trip-details {
+  background-color: #fff;
+  border-radius: 12px;
+  padding: 20px;
+  margin-bottom: 16px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.location-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.location-marker {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  margin-top: 4px;
+  flex-shrink: 0;
+}
+
+.pickup-marker {
+  background-color: #4caf50;
+}
+
+.drop-marker {
+  background-color: #f44336;
+}
+
+.location-info {
+  flex: 1;
+}
+
+.location-label {
+  font-size: 12px;
+  color: #999;
+  margin: 0 0 4px 0;
+  text-transform: uppercase;
+  font-weight: 500;
+}
+
+.location-address {
+  font-size: 14px;
+  color: #333;
+  margin: 0;
+  line-height: 1.4;
+}
+
+.location-divider {
+  width: 2px;
+  height: 24px;
+  background-color: #e0e0e0;
+  margin: 8px 0 8px 5px;
+}
+
+/* Driver Info */
+.driver-info-card {
+  background-color: #fff;
+  border-radius: 12px;
+  padding: 16px;
+  margin-bottom: 20px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.driver-avatar-small {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #4caf50 0%, #45a049 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.driver-avatar-small span {
+  font-size: 18px;
+  font-weight: 700;
+  color: #fff;
+}
+
+.driver-details {
+  flex: 1;
+}
+
+.driver-name {
+  font-size: 15px;
+  font-weight: 600;
+  color: #333;
+  margin: 0 0 4px 0;
+}
+
+.driver-vehicle {
+  font-size: 13px;
+  color: #666;
+  margin: 0;
+}
+
+/* Rating Section */
+.rating-section {
+  background-color: #fff;
+  border-radius: 12px;
+  padding: 20px;
+  margin-bottom: 20px;
+  text-align: center;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.rating-section h3 {
+  font-size: 16px;
+  font-weight: 600;
+  color: #333;
+  margin: 0 0 16px 0;
+}
+
+.stars {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+}
+
+.star-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 4px;
+  transition: transform 0.2s;
+}
+
+.star-btn:hover {
+  transform: scale(1.1);
+}
+
+.star-btn:active {
+  transform: scale(0.95);
+}
+
+/* Actions */
+.complete-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.payment-btn {
+  width: 100%;
+  background-color: #4caf50;
+  color: #fff;
+  border: none;
+  padding: 16px;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.payment-btn:hover {
+  background-color: #45a049;
+}
+
+.payment-btn:active {
+  transform: scale(0.98);
+}
+
+.payment-btn:disabled {
+  background-color: #ccc;
+  cursor: not-allowed;
+}
+
+.home-btn {
+  width: 100%;
+  background-color: #fff;
+  color: #333;
+  border: 2px solid #e0e0e0;
+  padding: 14px;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.home-btn:hover {
+  background-color: #f5f5f5;
+}
+
+.home-btn:active {
+  transform: scale(0.98);
+}
+
+/* Animations */
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* Responsive */
+@media (max-width: 480px) {
+  .ride-complete {
+    padding: 16px;
+  }
+
+  .complete-header h1 {
+    font-size: 22px;
+  }
+
+  .amount {
+    font-size: 40px;
+  }
+
+  .currency {
+    font-size: 24px;
+  }
+}

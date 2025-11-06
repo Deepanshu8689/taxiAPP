@@ -80,23 +80,19 @@ export class User {
     @Prop({ type: Number, default: 0 })
     pendingBalance: number; // sums of earnings still pending (optional)
 
-    @Prop({
-        type: {
-            accountNumber: Number,
-            bankName: String,
-            branchName: String,
-            IFSCcode: String
-        }
-    })
-    bankDetails: any
 
     @Prop({ type: [{ type: Types.ObjectId, ref: 'Ride' }], required: true })
     completedRides: Ride[]
 
     @Prop() razorpayContactId?: string;
 
-    @Prop() razorpayFundAccountId?: [string];
+    @Prop() razorpayFundAccountId?: string
 
+    @Prop({ type: [{type: Types.ObjectId, ref:  'Order'}], required: true })
+    orderId: Types.ObjectId[]
+
+    @Prop()
+    socketId: string
 }
 
 export type UserDocument = User & Document

@@ -1,37 +1,33 @@
 import React, { useContext, useEffect, useRef, useState } from 'react'
-import { AuthContext } from '../context/AuthContext'
 import { useNavigate } from 'react-router-dom'
 import { createSocketConnection } from '../socket'
 import "./../styles/searchingRide.css";
-import { useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
+import { addRide } from '../utils/rideSlice';
 
 const SearchingRide = () => {
   const navigate = useNavigate()
   const user = useSelector((store) => store.user)
-  const ride = useSelector((store) => store.ride)
+  const dispatch = useDispatch();
   const socketRef = useRef(null);
+  const [ride, setRide] = useState(null);
 
   useEffect(() => {
     const socket = createSocketConnection();
     socketRef.current = socket;
-
-    socketRef.current.emit('register', user)
-
-    socketRef.current.emit('BE-request-ride', ride )
-
+    getRequestedRide();
     socketRef.current.on('FE-ride-accepted', (acceptedRide) => {
       if (!acceptedRide) {
         throw new Error('Ride not found')
       }
       // locationHandler()
-      ride = acceptedRide
+      dispatch(addRide(acceptedRide))
+      setRide(acceptedRide)
       navigate('/ride-tracking')
     })
 
-    return () => {
-      socketRef.current.disconnect();
-    };
-  }, [user])
+
+  }, [])
 
   const locationHandler = async (e) => {
     e.preventDefault()
@@ -67,23 +63,38 @@ const SearchingRide = () => {
     }
   }
 
-  const cancelHandler = async () => {
-    const confirmCancel = window.confirm("Are you sure you want to cancel this ride?")
-    if (!confirmCancel) return
-    try {
 
-      const { _id } = ride
-      const res = await fetch(`http://localhost:3000/ride/cancelRide/${_id}`, {
-        method: "PATCH",
+  const getRequestedRide = async () => {
+    try {
+      const res = await fetch("http://localhost:3000/ride/getRequestedRide", {
         credentials: "include"
       })
-      await res.json()
-      if (!res.ok) {
-        throw new Error("Ride cancellation failed")
-      }
 
-      alert("Ride cancelled successfully")
-      navigate('/ride-request')
+      const data = await res.json()
+      if(!res.ok) {
+        alert(data.message || "Ride request failed")
+        navigate('/ride-request')
+      }
+      setRide(data)
+
+    } catch (error) {
+      console.log("error in getRequestedRide: ", error)
+      throw error
+    }
+  }
+
+  const cancelHandler = async () => {
+    
+    try {
+
+      if (!ride) {
+        navigate('/ride-request')
+      } else {
+        console.log("ride to be cancelled: ", ride)
+        socketRef.current.emit('BE-ride-cancel', ride)
+        alert("Ride cancelled successfully")
+        navigate('/ride-request')
+      }
 
     } catch (error) {
       console.log("error in cancelHandler: ", error)

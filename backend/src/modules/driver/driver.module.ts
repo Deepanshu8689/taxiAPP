@@ -10,6 +10,7 @@ import { ConfigService } from '@nestjs/config';
 import { CommonService } from '../common/common.service';
 import { Vehicle, VehicleSchema } from 'src/schema/vehicle.schema';
 import { User, UserSchema } from 'src/schema/user.schema';
+import { PayoutService } from '../payout/payout.service';
 
 @Module({
   imports: [
@@ -30,7 +31,7 @@ import { User, UserSchema } from 'src/schema/user.schema';
     }),
     OtpSmsModule
   ],
-  providers: [DriverService, DriverRepository, CommonService],
+  providers: [DriverService, DriverRepository, CommonService, PayoutService],
   controllers: [DriverController]
 })
 export class DriverModule { }

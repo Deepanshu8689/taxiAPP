@@ -14,6 +14,17 @@ export class RideController {
         private rideService: RideService
     ){}
 
+    // @Get('/:id')
+    // @Roles(Role.User, Role.Driver)
+    // async getRideById(@Param('id') id: string){
+    //     return await this.rideService.getRideById(id)
+    // }
+
+    @Get('/requestedRides')
+    async getAllRequestedRides(){
+        return await this.rideService.getAllRequestedRides()
+    }
+
     @Post('/getFares')
     @Roles(Role.User)
     async getFares(
@@ -23,6 +34,12 @@ export class RideController {
         return await this.rideService.getFares(dto, user)
     }
     
+
+    @Get('/getRequestedRide')
+    async getRideById(@User() user: any){
+        return await this.rideService.getRequestedRide(user.sub)
+    }
+
     @Post('/requestRide')
     @Roles(Role.User)
     async bookRide(

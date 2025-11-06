@@ -160,14 +160,14 @@ export class AuthRepository {
                 role: user.role,
                 phoneNumber: user.phoneNumber
             }
-            
+
             const ride = await this.rideSchema.findOne({ driverId: user._id, status: 'accepted' })
 
             if (user.role === Role.Driver && ride) {
                 user.status = 'busy';
                 await user.save();
             }
-            else if(user.role === Role.Driver && !ride){
+            else if (user.role === Role.Driver && !ride) {
                 user.status = 'available';
                 await user.save();
             }
@@ -207,6 +207,20 @@ export class AuthRepository {
         return res.cookie('token', null, {
             expires: new Date(Date.now()),
         }).json({ message: "Logout Successfull" })
+    }
+
+
+    async getFullUser(userId: string) {
+        try {
+            const user = await this.userSchema.findById(userId).select('-password');
+            if (!user) {
+                throw new NotFoundException('User not found');
+            }
+            return user;
+        } catch (error) {
+            console.log("error in getFullUser: ", error);
+            throw error;
+        }
     }
 
 }

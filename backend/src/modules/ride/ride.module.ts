@@ -12,6 +12,8 @@ import { RideGateway } from './ride.gateway';
 import { User, UserSchema } from 'src/schema/user.schema';
 import { Earning, EarningSchema } from 'src/schema/earning.schema';
 import { WalletService } from '../wallet/wallet.service';
+import { SocketService } from '../socket/socket.service';
+import { SocketConnection, SocketConnectionSchema } from 'src/schema/socketConnection.schema';
 
 @Module({
     imports: [
@@ -20,6 +22,7 @@ import { WalletService } from '../wallet/wallet.service';
             { name: User.name, schema: UserSchema },
             { name: Earning.name, schema: EarningSchema },
             { name: Vehicle.name, schema: VehicleSchema },
+            { name: SocketConnection.name, schema: SocketConnectionSchema }
         ]),
         JwtModule.registerAsync({
             inject: [ConfigService],
@@ -32,7 +35,7 @@ import { WalletService } from '../wallet/wallet.service';
             })
         }),
     ],
-    providers: [RideService, RideRepository, CommonService, RideGateway, WalletService],
+    providers: [RideService, RideRepository, CommonService, RideGateway, WalletService, SocketService],
     controllers: [RideController]
 })
 export class RideModule { }

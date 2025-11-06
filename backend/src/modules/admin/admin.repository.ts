@@ -181,7 +181,7 @@ export class AdminRepository {
         async fetchAllDrivers() {
             const drivers = await this.userSchema.find(
                 {isVerified: true, role: Role.Driver}
-            ).select('firstName image lastName drivingExperience emailId phoneNumber age vehicle.vehicleName vehicle.vehicleNumber vehicle.vehicleType vehicle.vehicleColor vehicle.vehicleImage')
+            ).populate('vehicle')
             
             if(drivers.length === 0){
                 return{

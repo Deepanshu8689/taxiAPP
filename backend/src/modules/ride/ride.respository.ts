@@ -102,6 +102,55 @@ export class RideRepository {
         return { cost: Number(cost.toFixed(2)), durationMin }
     }
 
+    async getRideById(id: string) {
+        try {
+
+            const ride = await this.rideSchema.findOne({ _id: id })
+            if (!ride) {
+                throw new Error("Ride not found")
+            }
+            return ride
+
+        } catch (error) {
+            console.log("error in getRideById: ", error)
+            throw error
+        }
+    }
+
+    async getRequestedRide(userId: string) {
+        try {
+            const ride = await this.rideSchema.findOne({
+                rider: new mongoose.Types.ObjectId(userId),
+                status: RideStatus.Requested
+            })
+            if(!ride){
+                return {
+                    success: false,
+                    message: "No requested ride found",
+                }
+            }
+
+            return ride
+
+        } catch (error) {
+            console.log("error in getRequestedRide: ", error)
+            throw error
+        }
+    }
+
+    async getAllRequestedRides() {
+        try {
+            const rides = await this.rideSchema.find({ status: RideStatus.Requested })
+            if (!rides) {
+                throw new Error("No requested rides found")
+            }
+            return rides
+        } catch (error) {
+            console.log("error in getAllRequestedRides: ", error)
+            throw error
+        }
+    }
+
     // actual logic to create ride
     async getFares(dto: GetFareDTO, user: any) {
         try {
@@ -177,7 +226,7 @@ export class RideRepository {
         try {
             await this.rideSchema.findByIdAndDelete(id)
 
-            if (user.role === 'driver') {
+            if (user && user.role === 'driver') {
                 const updateDriver = await this.userSchema.findOneAndUpdate(
                     { _id: user.sub },
                     { $set: { status: 'available' } },
@@ -375,12 +424,15 @@ export class RideRepository {
                 ],
             }).populate({
                 path: 'rider',
+                model: User.name,
                 select: 'firstName lastName phoneNumber latitude longitude',
             }).populate({
                 path: 'driver',
+                model: User.name,
                 select: 'firstName lastName image phoneNumber age vehicle latitude longitude',
             }).populate({
                 path: 'vehicle',
+                model: User.name,
                 select: 'vehicleName vehicleNumber vehicleType vehicleColor vehicleImage',
             })
 
@@ -424,7 +476,7 @@ export class RideRepository {
             const existingEarning = await this.earningSchema.findOne({
                 ride: ride._id
             })
-            if(existingEarning) {
+            if (existingEarning) {
                 throw new Error("Earning already exists for this ride")
             }
 

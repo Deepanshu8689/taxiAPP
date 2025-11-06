@@ -29,4 +29,9 @@ export class AuthService {
         async logoutUser(res: any, user: any){
             return await this.authRepo.logout(res, user)
         }
+
+        async getFullUser(userId: string){
+            return await this.authRepo.getFullUser(userId)
+        }
+
 }

@@ -2,18 +2,19 @@ import React, { useContext, useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import "./../styles/driverDashboard.css";
 import { AlertCircle, Clock, IndianRupee, MapPin, Navigation, Phone, User } from 'lucide-react'
-import { AuthContext } from '../context/AuthContext';
+// import { AuthContext } from '../context/AuthContext';
 import { createSocketConnection } from '../socket';
+import { useSelector } from 'react-redux';
 
-const DriverDashboard = ({ acceptedRide }) => {
+const DriverDashboard = () => {
 
     const [distance, setDistance] = useState(0)
-    const [ride, setRide] = useState(acceptedRide)
     const [duration, setDuration] = useState(0)
     const [loading, setLoading] = useState(true)
     const [error, setError] = useState(null)
     const navigate = useNavigate()
-    const { user } = useContext(AuthContext)
+    const user = useSelector((state) => state.user)
+    const [ride, setRide] = useState(null)
     const socketRef = useRef(null)
 
     useEffect(() => {
@@ -21,18 +22,16 @@ const DriverDashboard = ({ acceptedRide }) => {
         socketRef.current = socket
 
         getAcceptedRide()
-        const interval = setInterval(() => {
-            updateDistance()
+        const interval = setInterval((ride) => {
+            updateDistance(ride)
         }, 5000)
 
-        socketRef.current.emit('register', user)
-        
         return () => {
             clearInterval(interval)
         }
 
 
-    }, [user])
+    }, [])
 
     const getAcceptedRide = async () => {
         try {
@@ -45,13 +44,14 @@ const DriverDashboard = ({ acceptedRide }) => {
             // console.log("res: ", res)
             if (!res.ok) throw new Error("failed to fetch acceptedRide")
             const data = await res.json()
+            console.log("data in getAcceptedRide: ", data)
             if (!data.ride) {
                 navigate('/driver-homepage')
                 return
             }
-            setRide(data.ride || acceptedRide)
+            setRide(data.ride)
 
-            const { driver, vehicleType, pickupLat, pickupLng } = acceptedRide || data.ride
+            const { driver, vehicleType, pickupLat, pickupLng } = data.ride
             const { latitude: lat2, longitude: long2 } = driver
             const resDistance = await fetch(`http://localhost:3000/ride/currentDistance/${vehicleType}/${pickupLat}/${pickupLng}/${lat2}/${long2}`, {
                 credentials: "include"
@@ -73,7 +73,7 @@ const DriverDashboard = ({ acceptedRide }) => {
         }
     }
 
-    const updateDistance = async () => {
+    const updateDistance = async (ride) => {
         console.log("res in distance ")
         if (!ride) {
             console.log("ride not found")
@@ -187,7 +187,7 @@ const DriverDashboard = ({ acceptedRide }) => {
                                 <Navigation className="icon" />
                             </div>
                             <div>
-                                <p className="distance-value">{distance.toFixed(1)} km</p>
+                                <p className="distance-value">{distance} km</p>
                                 <p className="distance-label">away from rider</p>
                             </div>
                         </div>

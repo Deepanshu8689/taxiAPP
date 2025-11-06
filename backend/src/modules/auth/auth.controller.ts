@@ -60,7 +60,8 @@ export class AuthController {
     @Get('me')
     @UseGuards(AuthGuard)
     getProfile(@User() user: any) {
-        return { user };
+        const fullUser = this.authService.getFullUser(user.sub);
+        return fullUser;
     }
 
 }

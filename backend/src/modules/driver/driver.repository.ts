@@ -226,25 +226,27 @@ export class DriverRepository {
     async updateBankDetails(dto: BankDetailsDTO, user: any) {
         try {
 
-            const contact = await this.payoutService.createContact(user.sub)
-            const fundAccount = await this.payoutService.createFundAccount(contact.id, dto)
-            const driver = await this.userSchema.findByIdAndUpdate(
-                user.sub,
-                {
-                    razorpayContactId: contact.id,
-                    $push: {
-                        razorpayFundAccountId: fundAccount.id
-                    }
-                },
-                {new: true}
-            )
+            const driver = await this.userSchema.findById(user.sub);
+
+            let contactId = driver.razorpayContactId;
+            if (!contactId) {
+                const contact = await this.payoutService.createContact(user.sub);
+                contactId = contact.id;
+                driver.razorpayContactId = contactId;
+            }
+
+            let fundAccountId = driver.razorpayFundAccountId;
+            if (!fundAccountId) {
+                const fund = await this.payoutService.createFundAccount(contactId, dto);
+                fundAccountId = fund.id;
+                driver.razorpayFundAccountId = fundAccountId;
+            }
+            
+            await driver.save();
 
             return driver
-
-            
-            
         } catch (error) {
-            console.log("error in updateBankDetails: ", error)
+            console.log("error in updateBankDetails: ", error.response?.data || error)
             throw error
         }
 
