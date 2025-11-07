@@ -61,13 +61,13 @@ export class RideController {
         return await this.rideService.assignDriver(rideId, user.sub)
     }
 
-    @Post('/startRide/:id')
+    @Patch('/startRide/:id')
     @Roles(Role.Driver)
     async startRide(@Param('id') id: string){
         return await this.rideService.startRide(id)
     }
 
-    @Post('/completeRide/:id')
+    @Patch('/completeRide/:id')
     @Roles(Role.Driver)
     async endRide(@Param('id') id: string){
         return await this.rideService.endRide(id)
@@ -79,9 +79,9 @@ export class RideController {
         return await this.rideService.findDriver(rideId)
     }
 
-    @Get('/currentDistance/:vehicleType/:lat1/:long1/:lat2/:long2')
-    currentdistance(@Param('lat1') lat1: any, @Param('long1') long1: any, @Param('lat2') lat2: any, @Param('long2') long2: any, @Param('vehicleType') vehicleType: any){
-        return this.rideService.currentdistance(lat1, long1, lat2, long2, vehicleType)
+    @Get('/currentDistance/:vehicleType/:driverId/:lat1/:long1')
+    currentdistance(@Param('driverId') driverId: any, @Param('long1') long1: any, @Param('lat1') lat1: any, @Param('vehicleType') vehicleType: any){
+        return this.rideService.currentdistance(lat1, long1, driverId, vehicleType)
     }
 
     @Get('/acceptedRide')
@@ -90,8 +90,20 @@ export class RideController {
         return await this.rideService.getRide(user.sub)
     }
 
+    @Get('/getStartedRide')
+    @Roles(Role.Driver, Role.User)
+    async getStartedRide(@User() user: any){
+        return await this.rideService.getStartedRide(user.sub)
+    }
+
     @Post('/finalizeEarning/:rideId')
     async finalizeEarningforRide(@Param('rideId') rideId: string, @Body('paymentMethod') paymentMethod: string){
         return await this.rideService.finalizeEarningforRide(rideId, paymentMethod)
+    }
+
+    @Patch('/cancelAcceptedRide/:id')
+    @Roles(Role.Driver)
+    async cancelAcceptedRide(@Param('id') id: string, @User() user: any){
+        return await this.rideService.cancelAcceptedRide(id, user)
     }
 }

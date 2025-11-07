@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import "../../styles/rideRequest.css";
 import { useDispatch, useSelector } from "react-redux";
 import { removeUser } from "../../utils/Redux/userSlice";
-import { addRide } from "../../utils/Redux/rideSlice";
+import { setCurrentRide } from "../../utils/Redux/rideSlice";
 import { createSocketConnection } from "../../utils/Socket/socket";
 
 export default function RideRequest() {
@@ -114,10 +114,10 @@ export default function RideRequest() {
       const createdRide = await res.json()
       if (!res.ok) throw new Error(data.message || "Ride request failed");
 
-      dispatch(addRide(createdRide))
+      dispatch(setCurrentRide(createdRide))
       socketRef.current.emit('BE-request-ride', createdRide)
 
-      navigate('/searching-ride')
+      navigate('/rider/searching')
     } catch (error) {
       console.log("error in bookRideHandler: ", error)
       alert(error.message)
@@ -132,12 +132,11 @@ export default function RideRequest() {
       })
   
       const data = await res.json()
-      console.log("data in getRequestedRide: ", data)
       if(!data.success){
         console.log("No requested ride found, proceed to book a ride")
       }
       else{
-        navigate('/searching-ride')
+        navigate('/rider/searching')
       }
 
     } catch (error) {

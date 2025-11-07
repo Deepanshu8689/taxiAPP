@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { createSocketConnection } from '../../utils/Socket/socket'
 import "../../styles/searchingRide.css";
 import { useDispatch, useSelector } from 'react-redux';
-import { addRide } from '../../utils/Redux/rideSlice';
+import { setCurrentRide } from '../../utils/Redux/rideSlice';
 
 const SearchingRide = () => {
   const navigate = useNavigate()
@@ -21,9 +21,9 @@ const SearchingRide = () => {
         throw new Error('Ride not found')
       }
       // locationHandler()
-      dispatch(addRide(acceptedRide))
+      dispatch(setCurrentRide(acceptedRide))
       setRide(acceptedRide)
-      navigate('/ride-tracking')
+      navigate('/rider/tracking')
     })
 
 
@@ -88,12 +88,12 @@ const SearchingRide = () => {
     try {
 
       if (!ride) {
-        navigate('/ride-request')
+        navigate('/rider/request')
       } else {
         console.log("ride to be cancelled: ", ride)
         socketRef.current.emit('BE-ride-cancel', ride)
         alert("Ride cancelled successfully")
-        navigate('/ride-request')
+        navigate('/rider/request')
       }
 
     } catch (error) {

@@ -28,6 +28,10 @@ export class RideService {
         return await this.rideRepo.startRide(id)
     }
 
+    async getStartedRide(id: any){
+        return await this.rideRepo.getStartedRide(id)
+    }
+
     async endRide(id: string){
         return await this.rideRepo.rideComplete(id)
     }
@@ -37,8 +41,8 @@ export class RideService {
         
     }
 
-    currentdistance(lat1: any, long1: any, lat2: any, long2: any, vehicleType: any){
-        return this.rideRepo.currentDistance(lat1, long1, lat2, long2, vehicleType)
+    currentdistance(lat1: any, long1: any, driverId: any, vehicleType: any){
+        return this.rideRepo.currentDistance(lat1, long1, driverId, vehicleType)
     }
 
     async getRide(id: string){
@@ -59,5 +63,9 @@ export class RideService {
 
     async getRequestedRide(userId: string){
         return await this.rideRepo.getRequestedRide(userId)
+    }
+
+    async cancelAcceptedRide(id: string, user: any){
+        return await this.rideRepo.cancelAcceptedRide(id, user)
     }
 }

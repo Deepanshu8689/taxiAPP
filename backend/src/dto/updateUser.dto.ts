@@ -10,7 +10,6 @@ export class UpdateUserDTO {
     @IsOptional()
     lastName: string
 
-    @IsInt()
     @IsOptional()
     age: number
 

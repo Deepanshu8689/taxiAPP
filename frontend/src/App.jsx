@@ -7,9 +7,15 @@ import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
 import Login from "./pages/authRoutes/Login";
 import Signup from "./pages/authRoutes/Signup";
 import HomePage from "./pages/commonRoutes/HomePage";
+import ActiveRide from "./pages/commonRoutes/ActiveRide";
 
 // admin
 import AdminDashboard from "./pages/adminRoutes/AdminDashboard";
+import ManageUsers from "./pages/adminRoutes/ManageUsers";
+import ManageDrivers from "./pages/adminRoutes/ManageDrivers";
+import ManageRides from "./pages/adminRoutes/ManageRides";
+import Analytics from "./pages/adminRoutes/Analytics";
+import AdminLayout from "./pages/layouts/AdminLayout";
 
 // user routes
 import RiderLayout from "./pages/layouts/RiderLayout";
@@ -18,10 +24,15 @@ import RideRequest from "./pages/userRoutes/RideRequest";
 import SearchingRide from "./pages/userRoutes/SearchingRide";
 import RideTracking from "./pages/userRoutes/RideTracking";
 import RideComplete from "./pages/userRoutes/RideComplete";
+import RideHistory from "./pages/userRoutes/RideHistory";
 
 // driver routes
-import DriverPage from "./pages/driverRoutes/DriverPage";
+import DriverHomePage from "./pages/driverRoutes/DriverHomePage";
 import DriverDashboard from "./pages/driverRoutes/DriverDashboard";
+import DriverLayout from "./pages/layouts/DriverLayout";
+import DriverProfile from "./pages/driverRoutes/DriverProfile";
+import DriverEarnings from "./pages/driverRoutes/DriverEarnings";
+import DriverRideHistory from "./pages/driverRoutes/DriverRideHistory";
 
 // Protected Route Components
 const ProtectedRoute = ({ children, allowedRoles }) => {
@@ -98,17 +109,52 @@ function App() {
             <Route path="request" element={<RideRequest />} />
             <Route path="searching" element={<SearchingRide />} />
             <Route path="tracking" element={<RideTracking />} />
-            {/* <Route path="active" element={<ActiveRide />} /> */}
+            <Route path="active-ride" element={<ActiveRide />} />
             <Route path="ride-complete/:rideId" element={<RideComplete />} />
             <Route path="profile" element={<RiderProfile />} />
-            {/* <Route path="history" element={<RideHistory />} /> */}
+            <Route path="history" element={<RideHistory />} />
           </Route>
 
-          <Route path="/driver-homepage" element={<DriverPage />} />
-          <Route path="/driver-dashboard" element={<DriverDashboard />} />
-          <Route path="/admin-dashboard" element={<AdminDashboard />} />
-          
-          {/* </Route> */}
+
+          {/* Driver Routes */}
+          <Route
+            path="/driver"
+            element={
+              <ProtectedRoute allowedRoles={['driver']}>
+                <DriverLayout />
+              </ProtectedRoute>
+            }
+          >
+
+            <Route index element={<Navigate to="/driver/home" replace />} />
+            <Route path="home" element={<DriverHomePage />} />
+            <Route path="dashboard" element={<DriverDashboard />} />
+            <Route path="active-ride" element={<ActiveRide />} />
+            <Route path="profile" element={<DriverProfile />} />
+            <Route path="earnings" element={<DriverEarnings />} />
+            <Route path="history" element={<DriverRideHistory />} />
+
+          </Route>
+
+          {/* Admin Routes */}
+
+          <Route
+            path="/admin"
+            element={
+              <ProtectedRoute allowedRoles={['admin']}>
+                <AdminLayout />
+              </ProtectedRoute>
+            }
+          >
+            <Route index element={<Navigate to="/admin/dashboard" replace />} />
+            <Route path="dashboard" element={<AdminDashboard />} />
+            <Route path="users" element={<ManageUsers />} />
+            <Route path="drivers" element={<ManageDrivers />} />
+            <Route path="rides" element={<ManageRides />} />
+            <Route path="analytics" element={<Analytics />} />
+          </Route>
+
+
         </Routes>
       </Provider>
     </>

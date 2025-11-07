@@ -222,6 +222,31 @@ export class RideRepository {
 
     }
 
+    async cancelAcceptedRide(id: string, driverId: any) {
+        try {
+            const rideDriver = await this.userSchema.findById({_id: driverId})
+            const ride = await this.rideSchema.findOneAndUpdate(
+                {_id: id, driver: rideDriver._id, status: RideStatus.Accepted},
+                {
+                    $set: {
+                        driver: null,
+                        vehicle: null,
+                        status: RideStatus.Requested
+                    }
+                },
+                {new: true}
+            )
+
+            rideDriver.status = 'available'
+            await rideDriver.save()
+            return ride
+
+        } catch (error) {
+            console.log("error in cancelAcceptedRide: ", error)
+            throw error
+        }
+    }
+
     async cancelRide(id: string, user?: any) {
         try {
             await this.rideSchema.findByIdAndDelete(id)
@@ -397,8 +422,16 @@ export class RideRepository {
         }
     }
 
-    currentDistance(lat1: any, long1: any, lat2: any, long2: any, vehicleType: any) {
+    async currentDistance(lat1: any, long1: any, driverId: any, vehicleType: any) {
         try {
+            const driver = await this.userSchema.findOne({_id: driverId})
+            if(!driver){
+                throw new Error("Driver not found")
+            }
+            // console.log("driver: ", driver.latitude, driver.longitude)
+
+            const lat2 = driver.latitude
+            const long2 = driver.longitude
 
             const distance = this.commonService.haversineDistance(lat1, long1, lat2, long2)
             const duration = this.duration(vehicleType, distance)
@@ -432,14 +465,11 @@ export class RideRepository {
                 select: 'firstName lastName image phoneNumber age vehicle latitude longitude',
             }).populate({
                 path: 'vehicle',
-                model: User.name,
+                model: Vehicle.name,
                 select: 'vehicleName vehicleNumber vehicleType vehicleColor vehicleImage',
             })
-
-            // if(!ride){
-            //     // throw new Error("Ride not found")
-            //     return null
-            // }
+            console.log("user id: ", id)
+            console.log("ride: ", ride)
 
             return {
                 message: "Ride found successfully",
@@ -451,6 +481,39 @@ export class RideRepository {
             throw error
         }
 
+    }
+
+    async getStartedRide(id: string){
+        try {
+            const ride = await this.rideSchema.findOne({
+                status: RideStatus.Started,
+                $or: [
+                    { rider: new mongoose.Types.ObjectId(id) },
+                    { driver: new mongoose.Types.ObjectId(id) }
+                ],
+            }).populate({
+                path: 'rider',
+                model: User.name,
+                select: 'firstName lastName phoneNumber latitude longitude',
+            }).populate({
+                path: 'driver',
+                model: User.name,
+                select: 'firstName lastName image phoneNumber age vehicle latitude longitude',
+            }).populate({
+                path: 'vehicle',
+                model: Vehicle.name,
+                select: 'vehicleName vehicleNumber vehicleType vehicleColor vehicleImage',
+            })
+
+            return {
+                message: "Ride found successfully",
+                ride
+            }
+
+        } catch (error) {
+            console.log("error in getAcceptedRide: ", error)
+            throw error
+        }
     }
 
     async finalizeEarningforRide(rideId: string, paymentMethod: string) {

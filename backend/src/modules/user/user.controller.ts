@@ -48,14 +48,14 @@ export class UserController {
 
     @Patch('/updateProfile')
     @UseInterceptors(
-        FileInterceptor('file', multerUserConfig)
+        FileInterceptor('image', multerUserConfig)
     )
     async updateProfile(
         @User() user: any,
         @Body() dto: UpdateUserDTO,
-        @UploadedFile() file: Express.Multer.File
+        @UploadedFile() image: Express.Multer.File
     ) {
-        dto.image = file?.path || '';
+        dto.image = image?.path || '';
         return this.userService.updateProfile(user, dto)
     }
 

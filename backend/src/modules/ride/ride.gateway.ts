@@ -108,12 +108,49 @@ export class RideGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
         message: 'Ride broadcasted to drivers',
         ok: true
       };
-      
+
     } catch (error) {
       console.log("error in handleRequestRide: ", error)
       throw error
     }
   }
+
+  @SubscribeMessage('BE-acceptedRide-cancel')
+  async handleAcceptedRideCancelled(
+    @MessageBody() acceptedRide: any,
+    @ConnectedSocket() socket: Socket
+  ) {
+    try {
+      if (!acceptedRide) {
+        throw new Error('Accepted ride not found in gateway')
+      }
+      const drivers = await this.rideReop.findDrivers(acceptedRide._id)
+      const rider = acceptedRide.rider
+      const driver = acceptedRide.driver
+
+      const driverSocketId = await this.socketService.getSocketIdByUserId(String(driver._id))
+      const riderSocketId = await this.socketService.getSocketIdByUserId(String(rider._id))
+      const cancelledRide = await this.rideReop.cancelAcceptedRide(acceptedRide._id, driver._id)
+
+      if (driverSocketId && riderSocketId) {
+        this.io.to(riderSocketId).emit('FE-acceptedRide-cancelled')
+        this.io.to(driverSocketId).emit('FE-acceptedRide-cancelled')
+      }
+      else {
+        for (const driver of drivers) {
+          const socketId = await this.socketService.getSocketIdByUserId(String(driver._id))
+          if (socketId !== driverSocketId) {
+            this.io.to(socketId).emit('FE-new-ride', cancelledRide)
+          }
+        }
+      }
+
+    } catch (error) {
+      console.log("error in handleAcceptedRideCancelled: ", error)
+      throw error
+    }
+  }
+
 
   @SubscribeMessage('BE-ride-cancel')
   async handleRideCancelled(
@@ -121,7 +158,7 @@ export class RideGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
     @ConnectedSocket() socket: Socket
   ) {
     try {
-      
+
       const drivers = await this.rideReop.findDrivers(ride._id)
       await this.rideRepo.cancelRide(ride._id)
 
@@ -131,7 +168,7 @@ export class RideGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
           this.io.to(socketId).emit('FE-ride-cancelled', ride._id)
         }
       }
-      
+
     } catch (error) {
       console.log("error in handleRideCancelled: ", error)
       throw error
@@ -150,15 +187,13 @@ export class RideGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
       const rider = ride.rider
       const driver = ride.driver
 
-      console.log("driver in accept-ride: ", driver)
-      console.log("rider in accept-ride: ", rider)
 
       const riderSocketId = await this.socketService.getSocketIdByUserId(rider)
 
-      if(riderSocketId){
+      if (riderSocketId) {
         this.io.to(riderSocketId).emit('FE-ride-accepted', ride)
       }
-      else{
+      else {
         console.log("Rider not connected via socket")
       }
 
@@ -175,17 +210,59 @@ export class RideGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
     @ConnectedSocket() socket: Socket
   ) {
     try {
-      console.log("data: ", data)
 
-      const { lat, long, distance, duration, ride } = data
-      const rider = ride.rider._id
+      const { distance, duration, acceptedRide } = data
+      const riderId = acceptedRide.rider._id
 
-      this.io.to(`rider_${rider}`).emit('FE-update-distance', { distance, duration })
+      const riderSocketId = await this.socketService.getSocketIdByUserId((String(riderId)))
+
+      this.io.to(riderSocketId).emit('FE-update-distance', { distance, duration, acceptedRide })
 
     } catch (error) {
       console.log("error in handleUpdateDistance: ", error)
       throw error
     }
+  }
+
+  @SubscribeMessage('BE-start-ride')
+  async handleStartRide(
+    @MessageBody() startedRide: any,
+    @ConnectedSocket() socket: Socket
+  ){
+    try {
+
+      if(!startedRide){
+        throw new Error('Started ride not found in start-ride gateway')
+      }
+
+      const rider = startedRide.rider
+      const driver = startedRide.driver
+      
+      const driverSocketId = await this.socketService.getSocketIdByUserId(String(driver._id))
+      const riderSocketId = await this.socketService.getSocketIdByUserId(String(rider._id))
+      
+      if(driverSocketId && riderSocketId){
+        this.io.to(driverSocketId).emit('FE-ride-started', startedRide)
+        this.io.to(riderSocketId).emit('FE-ride-started', startedRide)
+      }
+      
+      return {
+        message: "Ride started successfully",
+      }
+      
+    } catch (error) {
+      console.log("error in handleStartRide: ", error)
+      throw error
+    }
+  }
+
+  @SubscribeMessage('BE-ride-completed')
+  async handleRideCompleted(
+    @MessageBody() data: any,
+    @ConnectedSocket() socket: Socket
+  ){
+    const {ride, rider, driver} = data
+    
   }
 
 }

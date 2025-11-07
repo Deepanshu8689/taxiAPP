@@ -4,9 +4,9 @@ import { useNavigate } from 'react-router-dom'
 import { useDispatch, useSelector } from 'react-redux'
 import { removeUser } from '../../utils/Redux/userSlice'
 import "../../styles/driverPage.css"
-import { addRide, removeRideFromFeed } from '../../utils/Redux/rideSlice'
+import { clearCurrentRide, setCurrentRide } from '../../utils/Redux/rideSlice'
 
-const DriverPage = () => {
+const DriverHomePage = () => {
     const user = useSelector((store) => store.user)
     const dispatch = useDispatch()
     const socketRef = useRef(null)
@@ -58,6 +58,11 @@ const DriverPage = () => {
         socketRef.current.on('FE-ride-cancelled', (rideId) => {
             console.log("Ride cancelled:", rideId);
             setRequestedRides((rides) => rides.filter(ride => ride._id !== rideId))
+        })
+
+        socketRef.current.on('FE-acceptedRide-cancel', (cancelledRide) => {
+            console.log("Ride cancelled:", cancelledRide);
+            setRequestedRides((rides) => rides.filter(ride => ride._id !== cancelledRide._id))
         })
 
         // socketRef.current.on('FE-driver-accepted', (ride) => {
@@ -123,7 +128,7 @@ const DriverPage = () => {
     const handleAcceptRide = async (id) => {
         try {
             setAcceptingRide(id)
-            dispatch(removeRideFromFeed())
+            dispatch(clearCurrentRide())
             const res = await fetch(`http://localhost:3000/ride/acceptRide/${id}`, {
                 method: "Post",
                 credentials: "include"
@@ -138,13 +143,13 @@ const DriverPage = () => {
             console.log("Ride accepted:", data.updatedRide)
 
             socketRef.current.emit('BE-ride-accept', data.updatedRide)
-            dispatch(addRide(data.updatedRide))
+            dispatch(setCurrentRide(data.updatedRide))
             
             // Remove accepted ride from list
             // setRequestedRides((rides) => rides.filter(ride => ride._id !== id))
             
             alert("Ride accepted successfully!")
-            navigate('/driver-dashboard')
+            navigate('/driver/dashboard')
         } catch (error) {
             console.error("Error in handleAcceptRide:", error)
             alert(error.message || "Failed to accept ride")
@@ -301,4 +306,4 @@ const DriverPage = () => {
     )
 }
 
-export default DriverPage
+export default DriverHomePage

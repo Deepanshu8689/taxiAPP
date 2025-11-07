@@ -46,7 +46,7 @@ export default function Login() {
             dispatch(addUser(data.user))
 
             if(data.user.role === 'driver'){
-                navigate('/driver-homepage')
+                navigate('/driver/home')
             }
             else if(data.user.role === 'user'){
                 navigate('/ride-request')

@@ -79,6 +79,7 @@ export class UserRepository {
 
     async updateProfile(user: any, dto: UpdateUserDTO) {
         try {
+            console.log("dto in repo: ", dto)
             const loggedInUser = await this.userSchema.findById(user.sub)
             if (dto.phoneNumber) {
                 const phoneNumber = dto.phoneNumber

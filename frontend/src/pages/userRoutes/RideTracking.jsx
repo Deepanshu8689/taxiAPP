@@ -1,11 +1,13 @@
 import React, { useContext, useEffect, useReducer, useRef, useState } from 'react'
 // import { AuthContext } from '../context/AuthContext'
 import { createSocketConnection } from '../../utils/Socket/socket'
-import { useSelector } from 'react-redux'
+import { useDispatch, useSelector } from 'react-redux'
 import { useNavigate } from 'react-router-dom'
 import "../../styles/rideTracking.css"
+import { setCurrentRide } from '../../utils/Redux/rideSlice'
 
 const RideTracking = () => {
+  
 
   const [ride, setRide] = useState(null)
   const [distance, setDistance] = useState(0)
@@ -15,6 +17,7 @@ const RideTracking = () => {
   const [error, setError] = useState(null)
   const navigate = useNavigate()
   const user = useSelector((store) => store.user)
+  const dispatch = useDispatch()
 
   useEffect(() => {
     const socket = createSocketConnection()
@@ -23,10 +26,22 @@ const RideTracking = () => {
     getAcceptedRide()
 
     socketRef.current.on('FE-update-distance', (data) => {
-      const { distance, duration, ride } = data
+      const { distance, duration, acceptedRide } = data
+      console.log("distance and duration in rideTracking: ", distance, duration)
       setDistance(distance)
       setDuration(duration)
-      setRide(ride)
+      setRide(acceptedRide)
+    })
+
+    socketRef.current.on('FE-acceptedRide-cancelled', () => {
+      alert(`Ride cancelled by driver!!
+      Please wait for 30 seconds before requesting another ride.`)
+      navigate('/rider/searching')
+    })
+
+    socketRef.current.on('FE-ride-started', (startedRide) => {
+      dispatch(setCurrentRide(startedRide))
+      navigate('/rider/active-ride')
     })
 
     return () => {
@@ -48,16 +63,13 @@ const RideTracking = () => {
 
       const data = await res.json()
       if (!data.ride) {
-        navigate('/driver-homepage')
+        navigate('/rider/searching')
         return
       }
       setRide(data.ride)
-      console.log("ride in getAcceptedRide: ", ride)
 
       const { driver, vehicleType, pickupLat, pickupLng } = data.ride
-      const { latitude: lat2, longitude: long2 } = driver
-      console.log("driver: ", driver)
-      const resDistance = await fetch(`http://localhost:3000/ride/currentDistance/${vehicleType}/${pickupLat}/${pickupLng}/${lat2}/${long2}`, {
+      const resDistance = await fetch(`http://localhost:3000/ride/currentDistance/${vehicleType}/${driver._id}/${pickupLat}/${pickupLng}`, {
         credentials: "include"
       })
 

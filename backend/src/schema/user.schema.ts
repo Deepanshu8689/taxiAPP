@@ -25,7 +25,7 @@ export class User {
     @Prop()
     image: string
 
-    @Prop({ required: true })
+    @Prop({type: Number, required: true })
     age: number
 
     @Prop({

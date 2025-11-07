@@ -4,36 +4,51 @@ import "../../styles/driverDashboard.css";
 import { AlertCircle, Clock, IndianRupee, MapPin, Navigation, Phone, User } from 'lucide-react'
 // import { AuthContext } from '../context/AuthContext';
 import { createSocketConnection } from '../../utils/Socket/socket';
-import { useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
+import { clearCurrentRide, setCurrentRide } from '../../utils/Redux/rideSlice';
 
 const DriverDashboard = () => {
 
     const [distance, setDistance] = useState(0)
+    const dispatch = useDispatch()
     const [duration, setDuration] = useState(0)
     const [loading, setLoading] = useState(true)
     const [error, setError] = useState(null)
     const navigate = useNavigate()
     const user = useSelector((state) => state.user)
-    const [ride, setRide] = useState(null)
+    const [acceptedRide, setAcceptedRide] = useState(null)
     const socketRef = useRef(null)
 
     useEffect(() => {
         const socket = createSocketConnection()
         socketRef.current = socket
+        
+        socketRef.current.on('FE-ride-accepted', (ride) => {
+            setAcceptedRide(ride)
+        })
+        
 
+
+        socketRef.current.on('FE-ride-started', (startedRide) => {
+            dispatch(setCurrentRide(startedRide))
+            navigate('/driver/active-ride')
+        })
+        
         getAcceptedRide()
-        const interval = setInterval((ride) => {
-            updateDistance(ride)
-        }, 5000)
+    }, [])
+
+    useEffect(() => {
+        const interval = setInterval(() => {
+            updateDistance()
+        }, 10000)
 
         return () => {
             clearInterval(interval)
         }
-
-
-    }, [])
+    }, [acceptedRide])
 
     const getAcceptedRide = async () => {
+
         try {
 
             setLoading(true)
@@ -46,26 +61,23 @@ const DriverDashboard = () => {
 
             const data = await res.json()
             if (!data.ride) {
-                navigate('/driver-homepage')
+                navigate('/driver/home')
                 return
             }
-            setRide(data.ride)
+            setAcceptedRide(data.ride)
 
             const { driver, vehicleType, pickupLat, pickupLng } = data.ride
-            const { latitude: lat2, longitude: long2 } = driver
-            console.log("driver: ", driver)
-            const resDistance = await fetch(`http://localhost:3000/ride/currentDistance/${vehicleType}/${pickupLat}/${pickupLng}/${lat2}/${long2}`, {
+            const resDistance = await fetch(`http://localhost:3000/ride/currentDistance/${vehicleType}/${driver._id}/${pickupLat}/${pickupLng}`, {
                 credentials: "include"
             })
 
 
             if (resDistance.ok) {
                 const { distance, duration } = await resDistance.json()
-                console.log("distance and duration: ", distance, duration)
                 setDistance(distance)
                 setDuration(duration)
             }
-            else{
+            else {
                 console.error("Failed to fetch distance and duration")
             }
 
@@ -78,24 +90,24 @@ const DriverDashboard = () => {
         }
     }
 
-    const updateDistance = async (ride) => {
-        console.log("res in distance ")
-        if (!ride) {
+    const updateDistance = async () => {
+        if (!acceptedRide) {
             console.log("ride not found")
             return
         }
 
         try {
-            const { driver, vehicleType, pickupLat, pickupLng } = ride
-            const { latitude: lat, longitude: long } = driver
-            const res = await fetch(`http://localhost:3000/ride/currentDistance/${vehicleType}/${lat}/${long}/${pickupLat}/${pickupLng}`, {
+            const { driver, vehicleType, pickupLat, pickupLng } = acceptedRide
+
+            const res = await fetch(`http://localhost:3000/ride/currentDistance/${vehicleType}/${driver._id}/${pickupLat}/${pickupLng}`, {
                 credentials: "include"
             })
 
 
             if (res.ok) {
                 const { distance, duration } = await res.json()
-                socketRef.current.emit('BE-update-distance', { lat, long, distance, duration, ride })
+                console.log("distance and duration: ", distance, duration)
+                socketRef.current.emit('BE-update-distance', { distance, duration, acceptedRide })
                 setDistance(distance)
                 setDuration(duration)
             }
@@ -105,7 +117,30 @@ const DriverDashboard = () => {
     }
 
     const startRideHandler = async () => {
-        alert("Ride started successfully")
+        try {
+            
+            if(distance !== 0){
+                alert("Cannot start the ride now. Reach to the pickup location.")
+                return 
+            }
+
+            const confirmStart = window.confirm("Are you sure you want to start this ride?")
+            if (!confirmStart) return
+
+            const res = await fetch(`http://localhost:3000/ride/startRide/${acceptedRide._id}`, {
+                method: "PATCH",
+                credentials: "include"
+            })
+            
+            if (!res.ok) throw new Error("Failed to start the ride")
+            const startedRide = await res.json();
+            console.log("startedRide: ", startedRide)
+            socketRef.current.emit('BE-start-ride', startedRide.ride)
+
+        } catch (error) {
+            console.error("Error in startRideHandler:", error)
+            alert("Failed to start the ride. Please try again.")
+        }
     }
 
     const cancelHandler = async () => {
@@ -113,18 +148,17 @@ const DriverDashboard = () => {
         if (!confirmCancel) return
         try {
 
-            const { _id } = ride
-            const res = await fetch(`http://localhost:3000/ride/cancelRide/${_id}`, {
-                method: "PATCH",
-                credentials: "include"
-            })
-            if (!res.ok) {
-                throw new Error("Ride cancellation failed")
+            if (!acceptedRide) {
+                navigate('/driver/home')
+            }
+            else {
+                socketRef.current.emit('BE-acceptedRide-cancel', acceptedRide)
+                dispatch(clearCurrentRide())
+                alert("Ride cancelled successfully")
+                navigate('/driver/home')
             }
 
-            alert("Ride cancelled successfully")
             // acceptedRide(null)
-            navigate('/driver-homepage')
 
         } catch (error) {
             console.error("Error in cancelHandler:", error)
@@ -164,7 +198,7 @@ const DriverDashboard = () => {
                     <AlertCircle className="error-icon" />
                     <h2>Error</h2>
                     <p>{error}</p>
-                    <button onClick={() => navigate('/driver-homepage')} className="error-btn">
+                    <button onClick={() => navigate('/driver/home')} className="error-btn">
                         Go to Homepage
                     </button>
                 </div>
@@ -211,7 +245,7 @@ const DriverDashboard = () => {
             </div>
 
             {/* Rider Details */}
-            {ride && <div className="dashboard-content">
+            {acceptedRide && <div className="dashboard-content">
                 <div className="rider-details-card">
                     <h2>Rider Details</h2>
 
@@ -222,7 +256,7 @@ const DriverDashboard = () => {
                             </div>
                             <div className="detail-content">
                                 <p className="detail-label">Name</p>
-                                <p className="detail-value">{`${ride.rider.firstName} ${ride.rider.lastName}` || 'N/A'}</p>
+                                <p className="detail-value">{`${acceptedRide.rider.firstName} ${acceptedRide.rider.lastName}` || 'N/A'}</p>
                             </div>
                         </div>
 
@@ -232,7 +266,7 @@ const DriverDashboard = () => {
                             </div>
                             <div className="detail-content">
                                 <p className="detail-label">Contact</p>
-                                <p className="detail-value">{ride.rider.phoneNumber || 'N/A'}</p>
+                                <p className="detail-value">{acceptedRide.rider.phoneNumber || 'N/A'}</p>
                             </div>
                         </div>
 
@@ -242,7 +276,7 @@ const DriverDashboard = () => {
                             </div>
                             <div className="detail-content">
                                 <p className="detail-label">Pickup Location</p>
-                                <p className="detail-value">{ride.pickupLocation || 'Location details'}</p>
+                                <p className="detail-value">{acceptedRide.pickupLocation || 'Location details'}</p>
                             </div>
                         </div>
 
@@ -252,7 +286,7 @@ const DriverDashboard = () => {
                             </div>
                             <div className="detail-content">
                                 <p className="detail-label">Drop Location</p>
-                                <p className="detail-value">{ride.dropLocation || 'Destination details'}</p>
+                                <p className="detail-value">{acceptedRide.dropLocation || 'Destination details'}</p>
                             </div>
                         </div>
 
@@ -262,7 +296,7 @@ const DriverDashboard = () => {
                             </div>
                             <div className="detail-content">
                                 <p className="detail-label">Fare Amount</p>
-                                <p className="detail-value">₹{ride.estimatedFare}</p>
+                                <p className="detail-value">₹{acceptedRide.estimatedFare}</p>
                             </div>
                         </div>
 
