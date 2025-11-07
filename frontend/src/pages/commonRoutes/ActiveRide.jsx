@@ -2,16 +2,30 @@ import React, { useEffect, useRef, useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { setCurrentRide } from '../../utils/Redux/rideSlice'
 import { createSocketConnection } from '../../utils/Socket/socket'
+import { useNavigate } from 'react-router-dom'
 
 const ActiveRide = () => {
   const user = useSelector((store) => store.user)
   const dispatch = useDispatch()
   const [ride, setRide] = useState(null)
   const socketRef = useRef(null)
+  const navigate = useNavigate()
 
   useEffect(() => {
     const socket = createSocketConnection()
     socketRef.current = socket
+
+    socketRef.current.on('FE-ride-completed', (ride) => {
+      dispatch(setCurrentRide(null))
+      setRide(null)
+      if(user.role === 'driver') {
+        navigate('/driver/home')
+      }
+      else{
+        navigate('/ride-request')
+      }
+    })
+
     fetchStartedRide()
   }, [])
 

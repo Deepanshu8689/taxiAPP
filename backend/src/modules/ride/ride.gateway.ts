@@ -228,28 +228,28 @@ export class RideGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
   async handleStartRide(
     @MessageBody() startedRide: any,
     @ConnectedSocket() socket: Socket
-  ){
+  ) {
     try {
 
-      if(!startedRide){
+      if (!startedRide) {
         throw new Error('Started ride not found in start-ride gateway')
       }
 
       const rider = startedRide.rider
       const driver = startedRide.driver
-      
+
       const driverSocketId = await this.socketService.getSocketIdByUserId(String(driver._id))
       const riderSocketId = await this.socketService.getSocketIdByUserId(String(rider._id))
-      
-      if(driverSocketId && riderSocketId){
+
+      if (driverSocketId && riderSocketId) {
         this.io.to(driverSocketId).emit('FE-ride-started', startedRide)
         this.io.to(riderSocketId).emit('FE-ride-started', startedRide)
       }
-      
+
       return {
         message: "Ride started successfully",
       }
-      
+
     } catch (error) {
       console.log("error in handleStartRide: ", error)
       throw error
@@ -260,9 +260,22 @@ export class RideGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
   async handleRideCompleted(
     @MessageBody() data: any,
     @ConnectedSocket() socket: Socket
-  ){
-    const {ride, rider, driver} = data
-    
-  }
+  ) {
+    try {
+      const { ride, rider, driver } = data
+      const driverSocketId = await this.socketService.getSocketIdByUserId(String(driver._id))
+      const riderSocketId = await this.socketService.getSocketIdByUserId(String(rider._id))
 
+      if (driverSocketId && riderSocketId) {
+        this.io.to(driverSocketId).emit('FE-ride-completed', ride)
+        this.io.to(riderSocketId).emit('FE-ride-completed', ride)
+      }
+      return {
+        message: "Ride started successfully",
+      }
+    } catch (error) {
+      console.log("error in handleRideCompleted: ", error)
+      throw error
+    }
+  }
 }
