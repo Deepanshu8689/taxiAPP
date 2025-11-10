@@ -26,6 +26,12 @@ const SearchingRide = () => {
       navigate('/rider/tracking')
     })
 
+    return () => {
+      if(socketRef.current) {
+        socketRef.current.off('FE-ride-accepted')
+      }
+    }
+
 
   }, [])
 

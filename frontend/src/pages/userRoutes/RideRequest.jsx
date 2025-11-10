@@ -33,6 +33,7 @@ export default function RideRequest() {
 
     const socket = createSocketConnection();
     socketRef.current = socket;
+
     getRequestedRide()
 
   }, [])
@@ -166,8 +167,12 @@ export default function RideRequest() {
         body: JSON.stringify(body)
       })
 
-      const createdRide = await res.json()
       if (!res.ok) throw new Error(data.message || "Ride request failed");
+      const createdRide = await res.json()
+      if(createdRide.success === false){
+        alert("Please verify your phone number before booking a ride")
+        return
+      }
 
       dispatch(setCurrentRide(createdRide))
       socketRef.current.emit('BE-request-ride', createdRide)

@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useSelector, useDispatch } from 'react-redux'
 import '../../styles/user/riderProfile.css'
-import { addUser } from '../../utils/Redux/userSlice'
+import { addUser, updateUser } from '../../utils/Redux/userSlice'
 
 const RiderProfile = () => {
   const user = useSelector((store) => store.user)
@@ -11,18 +11,20 @@ const RiderProfile = () => {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const [selectedFile, setSelectedFile] = useState(null)
+  const [showVerifyInput, setShowVerifyInput] = useState(false);
+  const [otp, setOtp] = useState("");
+  const [verifying, setVerifying] = useState(false);
 
   const [formData, setFormData] = useState({
     firstName: user?.firstName ?? '',
     lastName: user?.lastName ?? '',
     phoneNumber: user?.phoneNumber ?? '',
     emailId: user?.emailId ?? '',
-    image: user?.image ?? ''
+    image: user?.image ?? '',
+    age: user?.age ?? ''
   })
 
-  useEffect(() => {
 
-  })
 
   const handleInputChange = (e) => {
     setFormData({
@@ -52,7 +54,7 @@ const RiderProfile = () => {
         formDataToSend.append(key, payload[key]);
       }
 
-      if(selectedFile){
+      if (selectedFile) {
         formDataToSend.append('image', selectedFile);
       }
 
@@ -64,6 +66,7 @@ const RiderProfile = () => {
 
       const data = await res.json()
       console.log('Update response data:', data)
+      dispatch(updateUser(data))
 
       if (!res.ok) {
         throw new Error(data.message || 'Update failed')
@@ -72,7 +75,7 @@ const RiderProfile = () => {
       dispatch(addUser(data.user))
       setIsEditing(false)
       alert('Profile updated successfully!')
-      
+
     } catch (error) {
       console.error('Update error:', error)
       setError(error.message)
@@ -92,6 +95,64 @@ const RiderProfile = () => {
     })
     setIsEditing(false)
     setError('')
+  }
+
+  const sendOtpHandler = async () => {
+    setShowVerifyInput(true)
+    try {
+      const res = await fetch('http://localhost:3000/user/sendSms', {
+        method: 'Post',
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      })
+
+      const data = await res.json()
+      console.log("saved OTP: ", data.savedOtp)
+
+      if (data.savedOtp) {
+        setShowVerifyInput(true)
+      }
+
+    } catch (error) {
+      console.log("error in verifyHandler: ", error)
+      throw error
+    }
+  }
+
+  const handleVerifyOtp = async (e) => {
+    e.preventDefault()
+    try {
+
+      const res = await fetch('http://localhost:3000/user/verifyPhone', {
+        method: 'Post',
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ sms: otp })
+      })
+
+      if (!res.ok) {
+        throw new Error("Invalid OTP")
+      }
+
+      const data = await res.json()
+
+      if (data) {
+        alert("Phone number verified")
+      }
+
+      dispatch(updateUser({ isPhoneVerified: true }))
+      setShowVerifyInput(false)
+      setVerifying(false)
+      setOtp('')
+
+    } catch (error) {
+      console.log("error in handleVerifyOtp: ", error)
+      throw error
+    }
   }
 
   return (
@@ -138,6 +199,44 @@ const RiderProfile = () => {
               <div className="info-item">
                 <span className="info-label">Phone Number</span>
                 <span className="info-value">{user?.phoneNumber}</span>
+
+                {user?.isPhoneVerified ? (
+                  <span className="verified-badge">✅ Verified</span>
+                ) : (
+                  <div className="verify-container">
+                    {(!showVerifyInput && !user?.isPhoneVerified) ? (
+                      <button className="verify-btn" onClick={sendOtpHandler}>
+                        Verify
+                      </button>
+                    ) : (
+                      <div className="verify-input-wrapper">
+                        <input
+                          type="text"
+                          placeholder="Enter OTP"
+                          className="verify-input"
+                          value={otp}
+                          onChange={(e) => setOtp(e.target.value)}
+                        />
+                        <button
+                          className="verify-submit-btn"
+                          onClick={handleVerifyOtp}
+                          disabled={verifying}
+                        >
+                          {verifying ? "Verifying..." : "Submit"}
+                        </button>
+                        <button
+                          className="verify-cancel-btn"
+                          onClick={() => {
+                            setShowVerifyInput(false);
+                            setOtp("");
+                          }}
+                        >
+                          ✕
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                )}
               </div>
 
               <button
@@ -192,7 +291,6 @@ const RiderProfile = () => {
                   value={formData.emailId}
                   onChange={handleInputChange}
                 />
-                <small className="field-note">Email cannot be changed</small>
               </div>
 
               <div className="form-group">
@@ -202,6 +300,16 @@ const RiderProfile = () => {
                   type="tel"
                   name="phoneNumber"
                   value={formData.phoneNumber}
+                  onChange={handleInputChange}
+                />
+              </div>
+              <div className="form-group">
+                <label htmlFor="age">Age</label>
+                <input
+                  id="age"
+                  type="number"
+                  name="age"
+                  value={formData.age}
                   onChange={handleInputChange}
                 />
               </div>

@@ -158,7 +158,7 @@ export class OtpSmsService {
 
     async verifyPhone(user: any, sms: string) {
         try {
-            
+
             const emailId = user.emailId
 
             const latestOtp = await this.otpSchema.findOne({ emailId }).sort({ createdAt: -1 });
@@ -180,14 +180,12 @@ export class OtpSmsService {
             })
 
             // update driver's phone number aND mark verified
-            if (user.role === 'driver') { 
-                await this.userSchema.findOneAndUpdate(
-                    { emailId },
-                    { isPhoneVerified: true },
-                    { new: true }
-                )
-            }
-            
+            await this.userSchema.findOneAndUpdate(
+                { emailId },
+                { isPhoneVerified: true },
+                { new: true }
+            )
+
             return {
                 message: `Phone Number Verified Successfully`,
             }

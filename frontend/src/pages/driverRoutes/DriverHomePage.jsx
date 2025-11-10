@@ -33,13 +33,13 @@ const DriverHomePage = () => {
 
             const data = await res.json()
             console.log("data: ", data)
-            if(data.status === "accepted") {
+            if (data.status === "accepted") {
                 navigate('/driver/dashboard')
             }
-            else if(data.status === "started"){
+            else if (data.status === "started") {
                 navigate('/driver/active-ride')
             }
-            
+
         } catch (error) {
             console.error("Error in currentRide:", error)
             return null
@@ -93,22 +93,13 @@ const DriverHomePage = () => {
             setRequestedRides((rides) => rides.filter(ride => ride._id !== cancelledRide._id))
         })
 
-        // socketRef.current.on('FE-driver-accepted', (ride) => {
-        //     if(!ride){
-        //         setComingRide(null)
-        //         throw new Error('Ride not found')
-        //     }
-        //     else{
-        //         setComingRide(ride)
-        //         navigate('/driver-dashboard')
-        //     }
-        // })
-
-        // socketRef.current.on('FE-driver-rejected', () => {
-        //     setComingRide(null)
-        // })
-
-        
+        return () => {
+            if (socketRef.current) {
+                socketRef.current.off('FE-new-ride')
+                socketRef.current.off('FE-ride-cancelled')
+                socketRef.current.off('FE-acceptedRide-cancel')
+            }
+        }
 
     }, [])
 
@@ -163,7 +154,7 @@ const DriverHomePage = () => {
             })
 
             const data = await res.json()
-            
+
             if (!res.ok) {
                 throw new Error(data.message || "Ride request failed")
             }
@@ -172,10 +163,10 @@ const DriverHomePage = () => {
 
             socketRef.current.emit('BE-ride-accept', data.updatedRide)
             dispatch(setCurrentRide(data.updatedRide))
-            
+
             // Remove accepted ride from list
             // setRequestedRides((rides) => rides.filter(ride => ride._id !== id))
-            
+
             alert("Ride accepted successfully!")
             navigate('/driver/dashboard')
         } catch (error) {

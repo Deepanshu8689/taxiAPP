@@ -16,6 +16,76 @@
   margin-bottom: 24px;
 }
 
+.verify-container {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.verify-btn {
+  background-color: #007bff;
+  color: #fff;
+  font-size: 13px;
+  border: none;
+  border-radius: 6px;
+  padding: 4px 10px;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.verify-btn:hover {
+  background-color: #0056b3;
+}
+
+.verify-input-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.verify-input {
+  width: 100px;
+  padding: 4px 6px;
+  font-size: 13px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+}
+
+.verify-submit-btn {
+  background-color: #28a745;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  padding: 4px 10px;
+  cursor: pointer;
+  font-size: 13px;
+  transition: 0.2s;
+}
+
+.verify-submit-btn:hover {
+  background-color: #218838;
+}
+
+.verify-cancel-btn {
+  background: none;
+  border: none;
+  color: #888;
+  cursor: pointer;
+  font-size: 16px;
+  transition: 0.2s;
+}
+
+.verify-cancel-btn:hover {
+  color: #333;
+}
+
+.verified-badge {
+  color: #28a745;
+  font-weight: 600;
+  margin-left: 8px;
+}
+
+
 .profile-avatar-large {
   width: 100px;
   height: 100px;

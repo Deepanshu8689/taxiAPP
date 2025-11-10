@@ -33,8 +33,8 @@ export class UserController {
     }
 
     @Post('/verifyPhone')
-    async verifyPhone(@User() user: any, @Body('sms') sms: string) {
-        return await this.otpService.verifyPhone(user, sms);
+    async verifyPhone(@User() user: any, @Body() body: any) {
+        return await this.otpService.verifyPhone(user, body.sms);
     }
 
     @Patch('/updatePassword')

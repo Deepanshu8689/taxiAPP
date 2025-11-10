@@ -32,6 +32,12 @@ const ActiveRide = () => {
     })
 
     fetchStartedRide()
+
+    return () => {
+      if(socketRef.current) {
+        socketRef.current.off('FE-ride-completed')
+      }
+    }
   }, [])
 
   const fetchStartedRide = async () => {

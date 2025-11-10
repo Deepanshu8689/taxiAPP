@@ -200,6 +200,12 @@ export class RideRepository {
         try {
             const { pickupLocation, dropLocation, vehicleType, distance, estimatedFare, pickupLat, pickupLng, dropLat, dropLng } = dto
             const rider = await this.userSchema.findById(user.sub)
+            if(!rider.isPhoneVerified){
+                return {
+                    success: false,
+                    message: "Please verify your phone number first"
+                }
+            }
 
             const createdRide = await this.rideSchema.create({
                 pickupLocation,

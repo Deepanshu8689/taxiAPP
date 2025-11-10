@@ -1,6 +1,7 @@
 import { useDispatch } from "react-redux";
 import { useEffect, useState } from "react";
 import { addUser, removeUser } from "./utils/Redux/userSlice";
+import { Navigate } from "react-router-dom";
 
 export default function AuthProvider({ children }) {
   const dispatch = useDispatch();
@@ -13,9 +14,14 @@ export default function AuthProvider({ children }) {
           credentials: "include"
         });
 
-        if (!res.ok) throw new Error("Not logged in");
+        if (res.status === 403) {
+          console.log("Not logged in")
+        }
         
         const user = await res.json();
+        if(!user){
+          console.log("No user found")
+        }
         dispatch(addUser(user));
       } catch (error) {
         dispatch(removeUser());
