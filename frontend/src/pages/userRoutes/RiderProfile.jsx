@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useSelector, useDispatch } from 'react-redux'
-import '../../styles/riderProfile.css'
+import '../../styles/user/riderProfile.css'
 import { addUser } from '../../utils/Redux/userSlice'
 
 const RiderProfile = () => {
@@ -100,13 +100,9 @@ const RiderProfile = () => {
         <div className="profile-header">
           <div className="profile-avatar-large">
             {user?.image ? (
-              <img
-                src={user?.image}
-                alt="Profile"
-                className="profile-image"
-              />
+              <img src={`http://localhost:3000/${user.image}`} alt="Profile" />
             ) : (
-              <div>{user?.firstName?.charAt(0)}{user?.lastName?.charAt(0)}</div>
+              <span>{user?.firstName?.charAt(0)}{user?.lastName?.charAt(0)}</span>
             )}
           </div>
           <h2>{user?.firstName} {user?.lastName}</h2>

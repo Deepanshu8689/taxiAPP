@@ -80,9 +80,11 @@ export class User {
     @Prop({ type: Number, default: 0 })
     pendingBalance: number; // sums of earnings still pending (optional)
 
-
     @Prop({ type: [{ type: Types.ObjectId, ref: 'Ride' }], required: true })
     completedRides: Ride[]
+
+    @Prop({ type: [{type: Types.ObjectId, ref: 'Rating'}], required: true })
+    ratings: Types.ObjectId[]
 
     @Prop() razorpayContactId?: string;
 

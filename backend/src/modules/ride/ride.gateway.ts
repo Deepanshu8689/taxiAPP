@@ -234,13 +234,19 @@ export class RideGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
       if (!startedRide) {
         throw new Error('Started ride not found in start-ride gateway')
       }
+      console.log("Hello from gateway")
 
+      console.log("ride in start gateway: ", startedRide)
+      console.log("rider in start gateway: ", startedRide.rider)
+      console.log("driver in start gateway: ", startedRide.driver)
       const rider = startedRide.rider
       const driver = startedRide.driver
 
-      const driverSocketId = await this.socketService.getSocketIdByUserId(String(driver._id))
-      const riderSocketId = await this.socketService.getSocketIdByUserId(String(rider._id))
+      const driverSocketId = await this.socketService.getSocketIdByUserId(driver)
+      const riderSocketId = await this.socketService.getSocketIdByUserId(rider)
 
+      console.log("driverSocketId: ", driverSocketId)
+      console.log("riderSocketId: ", riderSocketId)
       if (driverSocketId && riderSocketId) {
         this.io.to(driverSocketId).emit('FE-ride-started', startedRide)
         this.io.to(riderSocketId).emit('FE-ride-started', startedRide)

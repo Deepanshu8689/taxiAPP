@@ -14,15 +14,27 @@ export class RideController {
         private rideService: RideService
     ){}
 
-    // @Get('/:id')
-    // @Roles(Role.User, Role.Driver)
-    // async getRideById(@Param('id') id: string){
-    //     return await this.rideService.getRideById(id)
-    // }
+    @Get('/rideHistory/:id')
+    @Roles(Role.User, Role.Driver)
+    async allRides(@Param('id') id: string){
+        return await this.rideService.getRides(id)
+    }
+
+    @Get('/currentRide')
+    @Roles(Role.User, Role.Driver)
+    async getCurrentRide(@User() user: any){
+        return await this.rideService.getCurrentRide(user.sub)
+    }
 
     @Get('/requestedRides')
     async getAllRequestedRides(){
         return await this.rideService.getAllRequestedRides()
+    }
+
+    @Get('/unpaidCompletedRide')
+    @Roles(Role.User)
+    async getUnpaidCompletedRide(@User() user: any){
+        return await this.rideService.getUnpaidCompletedRide(user.sub)
     }
 
     @Post('/getFares')
@@ -36,7 +48,7 @@ export class RideController {
     
 
     @Get('/getRequestedRide')
-    async getRideById(@User() user: any){
+    async getRequestedRide(@User() user: any){
         return await this.rideService.getRequestedRide(user.sub)
     }
 
@@ -105,5 +117,10 @@ export class RideController {
     @Roles(Role.Driver)
     async cancelAcceptedRide(@Param('id') id: string, @User() user: any){
         return await this.rideService.cancelAcceptedRide(id, user)
+    }
+
+    @Get('/getRide/:rideId')
+    async getRideById(@Param('rideId') id: string){
+        return await this.rideService.getRideById(id)
     }
 }

@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import { addUser } from "../../utils/Redux/userSlice";
-import "../../styles/signup.css";
+import "../../styles/auth/signup.css";
 
 export default function Signup() {
     const navigate = useNavigate();

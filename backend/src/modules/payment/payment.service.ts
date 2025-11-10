@@ -23,8 +23,9 @@ export class PaymentService {
 
     async createOrder(amount: number, user: any) {
         try {
-
-            const userData = await this.userSchema.findById(user.userId);
+            console.log("amount: ", amount)
+            console.log("user: ", user)
+            const userData = await this.userSchema.findById(user.sub);
             if (!userData) {
                 throw new Error("User not found");
             }
@@ -55,8 +56,8 @@ export class PaymentService {
             })
 
             return {
-                success: true,
-                orderId: order.id,
+                order,
+                key: this.configService.get<string>('RAZORPAY_KEY_ID')
             }
 
         } catch (error) {

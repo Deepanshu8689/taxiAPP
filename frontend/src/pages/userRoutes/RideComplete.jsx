@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import { useSelector } from 'react-redux'
 import { useNavigate, useParams } from 'react-router-dom'
-import "../../styles/rideComplete.css";
+import "../../styles/user/rideComplete.css";
 
 const RideComplete = () => {
 
@@ -31,7 +31,7 @@ const RideComplete = () => {
             setLoading(true)
             setError(null)
 
-            const res = await fetch(`http://localhost:3000/ride/${rideId}`, {
+            const res = await fetch(`http://localhost:3000/ride/getRide/${rideId}`, {
                 credentials: 'include'
             })
 

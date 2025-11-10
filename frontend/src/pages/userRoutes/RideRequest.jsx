@@ -1,6 +1,6 @@
 import { useContext, useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import "../../styles/rideRequest.css";
+import "../../styles/user/rideRequest.css";
 import { useDispatch, useSelector } from "react-redux";
 import { removeUser } from "../../utils/Redux/userSlice";
 import { setCurrentRide } from "../../utils/Redux/rideSlice";
@@ -20,16 +20,71 @@ export default function RideRequest() {
   const [loading, setLoading] = useState(false);
   const [locationLoading, setLocationLoading] = useState(false)
 
+
+  useEffect(() => {
+    currentRide()
+    fetchCompletedUnpaidRide()
+  }, [])
+
   useEffect(() => {
     if (!user) {
       console.log("No user found, redirecting to login");
     };
-    
+
     const socket = createSocketConnection();
     socketRef.current = socket;
     getRequestedRide()
-    
+
   }, [])
+
+  const fetchCompletedUnpaidRide = async () => {
+    setLoading(true)
+    try {
+      const res = await fetch(`http://localhost:3000/ride/unpaidCompletedRide`, {
+        credentials: 'include'
+      })
+
+      if (!res.ok) {
+        throw new Error('Failed to fetch ride details')
+      }
+
+      const data = await res.json()
+      if(!data.success) return
+      console.log('Fetched unpaid completed ride details:', data)
+      navigate(`/rider/payment/${data._id}`)
+
+    } catch (error) {
+      console.error('Error fetching ride:', error)
+      setError(error.message)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const currentRide = async () => {
+    try {
+      const res = await fetch("http://localhost:3000/ride/currentRide", {
+        credentials: "include"
+      })
+
+      if (!res.ok) {
+        throw new Error('Failed to fetch current ride')
+      }
+
+      const data = await res.json()
+      console.log("data: ", data)
+      if (data.status === "accepted") {
+        navigate('/rider/tracking')
+      }
+      else if (data.status === "started") {
+        navigate('/rider/active-ride')
+      }
+
+    } catch (error) {
+      console.error("Error in currentRide:", error)
+      return null
+    }
+  }
 
   const locationHandler = async (e) => {
     e.preventDefault()
@@ -130,12 +185,12 @@ export default function RideRequest() {
       const res = await fetch("http://localhost:3000/ride/getRequestedRide", {
         credentials: "include"
       })
-  
+
       const data = await res.json()
-      if(!data.success){
+      if (!data.success) {
         console.log("No requested ride found, proceed to book a ride")
       }
-      else{
+      else {
         navigate('/rider/searching')
       }
 

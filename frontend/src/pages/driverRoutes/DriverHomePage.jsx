@@ -3,7 +3,7 @@ import { createSocketConnection } from '../../utils/Socket/socket'
 import { useNavigate } from 'react-router-dom'
 import { useDispatch, useSelector } from 'react-redux'
 import { removeUser } from '../../utils/Redux/userSlice'
-import "../../styles/driverPage.css"
+import "../../styles/driver/driverPage.css"
 import { clearCurrentRide, setCurrentRide } from '../../utils/Redux/rideSlice'
 
 const DriverHomePage = () => {
@@ -11,12 +11,40 @@ const DriverHomePage = () => {
     const dispatch = useDispatch()
     const socketRef = useRef(null)
     const navigate = useNavigate()
-    
     const [requestedRides, setRequestedRides] = useState([])
     const [loading, setLoading] = useState(true)
     const [locationLoading, setLocationLoading] = useState(false)
     const [acceptingRide, setAcceptingRide] = useState(null)
 
+    useEffect(() => {
+        currentRide()
+    }, [])
+
+    const currentRide = async () => {
+        try {
+            const res = await fetch("http://localhost:3000/ride/currentRide", {
+                credentials: "include"
+            })
+
+            if (!res.ok) {
+                console.warn('Failed to fetch current ride')
+                return
+            }
+
+            const data = await res.json()
+            console.log("data: ", data)
+            if(data.status === "accepted") {
+                navigate('/driver/dashboard')
+            }
+            else if(data.status === "started"){
+                navigate('/driver/active-ride')
+            }
+            
+        } catch (error) {
+            console.error("Error in currentRide:", error)
+            return null
+        }
+    }
 
     const fetchRequestedRides = async () => {
         setLoading(true)

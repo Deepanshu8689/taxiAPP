@@ -33,6 +33,7 @@ export class DriverRepository {
     async getProfile(user: any) {
 
         const profile = await this.userSchema.findById(user.sub)
+        .populate('vehicle')
         if (!profile) {
             throw new NotFoundException("Driver not found")
         }

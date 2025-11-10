@@ -1,0 +1,371 @@
+/* Active Ride Page */
+.active-ride {
+  min-height: calc(100vh - 140px);
+  background-color: #f5f5f5;
+  padding: 20px;
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+/* Loading States */
+.active-ride-loading,
+.active-ride-empty {
+  min-height: calc(100vh - 140px);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.spinner {
+  width: 40px;
+  height: 40px;
+  border: 3px solid #e0e0e0;
+  border-top-color: #667eea;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* Status Header */
+.ride-status-header {
+  text-align: center;
+  margin-bottom: 24px;
+}
+
+.status-indicator {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 80px;
+  height: 80px;
+  margin-bottom: 16px;
+}
+
+.pulse-ring {
+  position: absolute;
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  background-color: rgba(76, 175, 80, 0.2);
+  animation: pulse-ring 2s ease-out infinite;
+}
+
+.pulse-dot {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background-color: #4caf50;
+  position: relative;
+  z-index: 1;
+}
+
+@keyframes pulse-ring {
+  0% {
+    transform: scale(0.5);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1.2);
+    opacity: 0;
+  }
+}
+
+.ride-status-header h1 {
+  font-size: 24px;
+  font-weight: 700;
+  color: #333;
+  margin: 0 0 8px 0;
+}
+
+.ride-subtitle {
+  font-size: 14px;
+  color: #666;
+  margin: 0;
+}
+
+/* Trip Info Card */
+.trip-info-card {
+  background-color: #fff;
+  border-radius: 16px;
+  padding: 24px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  margin-bottom: 16px;
+}
+
+.trip-info-card h2 {
+  font-size: 18px;
+  font-weight: 600;
+  color: #333;
+  margin: 0 0 20px 0;
+}
+
+/* Trip Locations */
+.trip-locations {
+  margin-bottom: 20px;
+}
+
+.location-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.location-icon {
+  width: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.icon-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background-color: #4caf50;
+}
+
+.icon-square {
+  width: 10px;
+  height: 10px;
+  background-color: #f44336;
+  border-radius: 2px;
+}
+
+.location-text {
+  flex: 1;
+}
+
+.location-label {
+  font-size: 12px;
+  color: #999;
+  margin: 0 0 4px 0;
+  text-transform: uppercase;
+  font-weight: 500;
+}
+
+.location-value {
+  font-size: 15px;
+  color: #333;
+  margin: 0;
+  line-height: 1.4;
+  font-weight: 500;
+}
+
+.location-divider {
+  padding: 12px 0 12px 11px;
+}
+
+.divider-line {
+  width: 2px;
+  height: 24px;
+  background-color: #e0e0e0;
+}
+
+/* Trip Details */
+.trip-details {
+  display: flex;
+  gap: 16px;
+  padding: 16px;
+  background-color: #f8f8f8;
+  border-radius: 12px;
+}
+
+.detail-item {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  flex: 1;
+}
+
+.detail-label {
+  font-size: 12px;
+  color: #999;
+  text-transform: uppercase;
+  font-weight: 500;
+}
+
+.detail-value {
+  font-size: 16px;
+  color: #333;
+  font-weight: 600;
+}
+
+/* Rider/Driver Info Card */
+.rider-info-card,
+.driver-info-card {
+  background-color: #fff;
+  border-radius: 16px;
+  padding: 20px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  margin-bottom: 16px;
+}
+
+.rider-info-card h3,
+.driver-info-card h3 {
+  font-size: 16px;
+  font-weight: 600;
+  color: #333;
+  margin: 0 0 16px 0;
+}
+
+.rider-details,
+.driver-details {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.rider-avatar,
+.driver-avatar {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  font-weight: 700;
+  color: #fff;
+  flex-shrink: 0;
+}
+
+.rider-text,
+.driver-text {
+  flex: 1;
+}
+
+.rider-name,
+.driver-name {
+  font-size: 16px;
+  font-weight: 600;
+  color: #333;
+  margin: 0 0 4px 0;
+}
+
+.rider-phone,
+.vehicle-info {
+  font-size: 13px;
+  color: #666;
+  margin: 0;
+}
+
+.call-btn-small {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background-color: #4caf50;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  text-decoration: none;
+  flex-shrink: 0;
+  transition: all 0.2s;
+}
+
+.call-btn-small:hover {
+  background-color: #45a049;
+  transform: scale(1.05);
+}
+
+.call-btn-small:active {
+  transform: scale(0.95);
+}
+
+/* Action Section */
+.action-section {
+  margin-top: 20px;
+}
+
+.complete-ride-btn {
+  width: 100%;
+  background-color: #4caf50;
+  color: #fff;
+  border: none;
+  padding: 18px;
+  border-radius: 12px;
+  font-size: 17px;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(76, 175, 80, 0.4);
+  transition: all 0.2s;
+}
+
+.complete-ride-btn:hover {
+  background-color: #45a049;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(76, 175, 80, 0.5);
+}
+
+.complete-ride-btn:active {
+  transform: translateY(0);
+}
+
+.complete-ride-btn:disabled {
+  background-color: #ccc;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+/* Rider Message */
+.rider-message {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-radius: 16px;
+  padding: 32px 24px;
+  text-align: center;
+  color: #fff;
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+}
+
+.message-icon {
+  font-size: 48px;
+  margin-bottom: 16px;
+}
+
+.rider-message p {
+  font-size: 20px;
+  font-weight: 600;
+  margin: 0 0 8px 0;
+}
+
+.rider-message small {
+  font-size: 14px;
+  opacity: 0.9;
+}
+
+/* Responsive */
+@media (max-width: 640px) {
+  .active-ride {
+    padding: 16px;
+  }
+
+  .ride-status-header h1 {
+    font-size: 22px;
+  }
+
+  .trip-info-card,
+  .rider-info-card,
+  .driver-info-card {
+    padding: 20px;
+  }
+
+  .trip-details {
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .detail-item {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+  }
+}

@@ -106,6 +106,7 @@ export class RideRepository {
         try {
 
             const ride = await this.rideSchema.findOne({ _id: id })
+                .populate('rider')
             if (!ride) {
                 throw new Error("Ride not found")
             }
@@ -123,7 +124,7 @@ export class RideRepository {
                 rider: new mongoose.Types.ObjectId(userId),
                 status: RideStatus.Requested
             })
-            if(!ride){
+            if (!ride) {
                 return {
                     success: false,
                     message: "No requested ride found",
@@ -222,11 +223,46 @@ export class RideRepository {
 
     }
 
+    async getCurrentRide(id: string) {
+        try {
+
+            const ride = await this.rideSchema.findOne({
+                $and: [
+                    {
+                        $or: [
+                            { status: RideStatus.Accepted },
+                            { status: RideStatus.Started }
+                        ]
+                    },
+                    {
+                        $or: [
+                            { rider: new mongoose.Types.ObjectId(id) },
+                            { driver: new mongoose.Types.ObjectId(id) }
+                        ],
+                    }
+                ],
+            })
+            console.log("current ride: ", ride)
+            if (!ride) {
+                return {
+                    success: false,
+                    message: "No current ride found",
+                }
+            }
+
+            return ride
+
+        } catch (error) {
+            console.log("error in getCurrentRide: ", error)
+            throw error
+        }
+    }
+
     async cancelAcceptedRide(id: string, driverId: any) {
         try {
-            const rideDriver = await this.userSchema.findById({_id: driverId})
+            const rideDriver = await this.userSchema.findById({ _id: driverId })
             const ride = await this.rideSchema.findOneAndUpdate(
-                {_id: id, driver: rideDriver._id, status: RideStatus.Accepted},
+                { _id: id, driver: rideDriver._id, status: RideStatus.Accepted },
                 {
                     $set: {
                         driver: null,
@@ -234,7 +270,7 @@ export class RideRepository {
                         status: RideStatus.Requested
                     }
                 },
-                {new: true}
+                { new: true }
             )
 
             rideDriver.status = 'available'
@@ -424,8 +460,8 @@ export class RideRepository {
 
     async currentDistance(lat1: any, long1: any, driverId: any, vehicleType: any) {
         try {
-            const driver = await this.userSchema.findOne({_id: driverId})
-            if(!driver){
+            const driver = await this.userSchema.findOne({ _id: driverId })
+            if (!driver) {
                 throw new Error("Driver not found")
             }
             // console.log("driver: ", driver.latitude, driver.longitude)
@@ -483,7 +519,7 @@ export class RideRepository {
 
     }
 
-    async getStartedRide(id: string){
+    async getStartedRide(id: string) {
         try {
             const ride = await this.rideSchema.findOne({
                 status: RideStatus.Started,
@@ -563,6 +599,14 @@ export class RideRepository {
                 await this.walletService.deductMoneyFromOnline(String(ride.driver), netAmount, totalCut)
             }
 
+            await this.rideSchema.updateOne({
+                _id: rideId
+            }, {
+                $set: {
+                    earning: earning._id
+                }
+            })
+
             return {
                 message: "Earning created successfully",
                 earning
@@ -571,6 +615,56 @@ export class RideRepository {
         }
         catch (error) {
             console.log("error in finalizeEarningforRide: ", error)
+            throw error
+        }
+    }
+
+    async getUnpaidCompletedRide(id: string) {
+        try {
+            const ride = await this.rideSchema.findOne({
+                status: RideStatus.Completed,
+                rider: new mongoose.Types.ObjectId(id),
+                $or: [
+                    { earning: null },
+                    { earning: { $exists: false } }
+                ]
+            }).sort({ createdAt: -1 });
+
+            if (!ride) {
+                return {
+                    success: false,
+                    message: "No unpaid completed ride found",
+                };
+            }
+
+            console.log("ride: ", ride)
+            return ride
+        } catch (error) {
+            console.log("error in getUnpaidCompletedRide: ", error)
+            throw error
+        }
+    }
+
+    async getRides(id: string) {
+        try {
+
+            const rides = await this.rideSchema.find().populate({
+                path: 'rider',
+                model: User.name,
+            }).populate({
+                path: 'driver',
+                model: User.name,
+                // select: 'firstName lastName image phoneNumber age vehicle latitude longitude',
+            }).populate({
+                path: 'vehicle',
+                model: Vehicle.name,
+                // select: 'vehicleName vehicleNumber vehicleType vehicleColor vehicleImage',
+            })
+
+            return rides
+
+        } catch (error) {
+            console.log("error in getRides: ", error)
             throw error
         }
     }

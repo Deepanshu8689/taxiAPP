@@ -1,6 +1,6 @@
 import { Outlet, NavLink, useNavigate } from 'react-router-dom'
 import { useDispatch, useSelector } from 'react-redux'
-import '../../styles/driverLayout.css'
+import '../../styles/driver/driverLayout.css'
 import { removeUser } from '../../utils/Redux/userSlice'
 
 const DriverLayout = () => {

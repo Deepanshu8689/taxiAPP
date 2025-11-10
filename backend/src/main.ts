@@ -9,6 +9,7 @@ import { join } from 'path';
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   dotenv.config();
+  app.use('/payment/webhook', express.raw({type: 'application/json'}))
   // console.log("port: ", process.env.PORT)
   app.use(cookieParser())
   app.useGlobalPipes(new ValidationPipe({
@@ -16,7 +17,7 @@ async function bootstrap() {
     forbidNonWhitelisted: true
   }))
   app.enableCors({
-    origin: "http://localhost:5173", // your React dev server
+    origin: "http://localhost:5173", // React dev server
     credentials: true,
   });
 

@@ -20,11 +20,12 @@ import AdminLayout from "./pages/layouts/AdminLayout";
 // user routes
 import RiderLayout from "./pages/layouts/RiderLayout";
 import RiderProfile from "./pages/userRoutes/RiderProfile";
+import RidePayment from "./pages/userRoutes/RidePayment";
 import RideRequest from "./pages/userRoutes/RideRequest";
 import SearchingRide from "./pages/userRoutes/SearchingRide";
 import RideTracking from "./pages/userRoutes/RideTracking";
 import RideComplete from "./pages/userRoutes/RideComplete";
-import RideHistory from "./pages/userRoutes/RideHistory";
+import RideHistory from "./pages/commonRoutes/RideHistory";
 
 // driver routes
 import DriverHomePage from "./pages/driverRoutes/DriverHomePage";
@@ -32,7 +33,6 @@ import DriverDashboard from "./pages/driverRoutes/DriverDashboard";
 import DriverLayout from "./pages/layouts/DriverLayout";
 import DriverProfile from "./pages/driverRoutes/DriverProfile";
 import DriverEarnings from "./pages/driverRoutes/DriverEarnings";
-import DriverRideHistory from "./pages/driverRoutes/DriverRideHistory";
 
 // Protected Route Components
 const ProtectedRoute = ({ children, allowedRoles }) => {
@@ -111,6 +111,7 @@ function App() {
             <Route path="tracking" element={<RideTracking />} />
             <Route path="active-ride" element={<ActiveRide />} />
             <Route path="ride-complete/:rideId" element={<RideComplete />} />
+            <Route path="payment/:rideId" element={<RidePayment />} />
             <Route path="profile" element={<RiderProfile />} />
             <Route path="history" element={<RideHistory />} />
           </Route>
@@ -132,7 +133,8 @@ function App() {
             <Route path="active-ride" element={<ActiveRide />} />
             <Route path="profile" element={<DriverProfile />} />
             <Route path="earnings" element={<DriverEarnings />} />
-            <Route path="history" element={<DriverRideHistory />} />
+            {/* <Route path="history" element={<DriverRideHistory />} /> */}
+            <Route path="history" element={<RideHistory />} />
 
           </Route>
 

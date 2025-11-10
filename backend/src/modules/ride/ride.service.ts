@@ -68,4 +68,16 @@ export class RideService {
     async cancelAcceptedRide(id: string, user: any){
         return await this.rideRepo.cancelAcceptedRide(id, user)
     }
+
+    async getRides(id: string){
+        return await this.rideRepo.getRides(id)
+    }
+
+    async getCurrentRide(id: string){
+        return await this.rideRepo.getCurrentRide(id)
+    }
+
+    async getUnpaidCompletedRide(id: string){
+        return await this.rideRepo.getUnpaidCompletedRide(id)
+    }
 }

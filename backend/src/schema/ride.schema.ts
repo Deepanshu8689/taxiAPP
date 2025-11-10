@@ -45,6 +45,9 @@ export class Ride {
 
     @Prop({ default: null, type: Types.ObjectId, ref: 'Rating' })
     rating?: Rating
+
+    @Prop({ default: null, type: Types.ObjectId, ref: 'Earning' })
+    earning?: Types.ObjectId
 }
 
 export type RideDocument = Ride & Document
