@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Param, Patch, UploadedFile, UploadedFiles, UseGuards, UseInterceptors } from '@nestjs/common';
+import { Body, Controller, Get, Param, Patch, Query, UploadedFile, UploadedFiles, UseGuards, UseInterceptors } from '@nestjs/common';
 import { Roles } from 'src/common/decorators/role.decorator';
 import { AuthGuard } from 'src/common/guards/auth/auth.guard';
 import { Role } from 'src/enum/role.enum';
@@ -22,9 +22,8 @@ export class AdminController {
         return await this.adminService.getProfile(user);
     }
 
+    // @Roles(Role.Admin)
     @Patch('/verifyVehicle/:id')
-    @UseGuards(AuthGuard, RoleGuard)
-    @Roles(Role.Admin)
     async verifyVehicle(
         @Param('id') id: string,
     ) {
@@ -32,8 +31,6 @@ export class AdminController {
     }
 
     @Patch('/verifyDriver/:id')
-    @UseGuards(AuthGuard, RoleGuard)
-    @Roles(Role.Admin)
     async verifyDriver(
         @Param('id') id: string,
     ) {
@@ -41,7 +38,6 @@ export class AdminController {
     }
 
     @Patch('/updatePassword')
-    @UseGuards(AuthGuard)
     async updatePassword(
         @User() user: any,
         @Body() body: any
@@ -51,7 +47,6 @@ export class AdminController {
 
 
     @Patch('/updateProfile')
-    @UseGuards(AuthGuard)
     @UseInterceptors(
         FileInterceptor('file', multerUserConfig)
     )
@@ -71,8 +66,29 @@ export class AdminController {
     }
 
     @Get('/allDrivers')
-    async getAllDrivers(){
-        return await this.adminService.fetchAllDrivers()
+    async getAllDrivers(@Query('verified') verified?: string){
+        console.log("filter in controller: ", verified)
+        return await this.adminService.fetchAllDrivers(verified)
+    }
+
+    @Get('allRides')
+    async getAllRides(@Query('status') status?: string){
+        return await this.adminService.getAllRides(status)
+    }
+
+    @Patch('/suspendDriver/:id')
+    async suspendDriver(@Param('id') id: string){
+        return await this.adminService.suspendDriver(id)
+    }
+
+    @Get('analytics')
+    async getAnalytics(){
+        return await this.adminService.getAnalytics()
+    }
+
+    @Get('/earnings')
+    async getEarnings(){
+        return await this.adminService.getEarnings()
     }
 
 }

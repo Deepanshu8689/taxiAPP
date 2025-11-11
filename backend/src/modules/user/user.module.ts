@@ -15,8 +15,8 @@ import { User, UserSchema } from 'src/schema/user.schema';
 @Module({
   imports: [
     MongooseModule.forFeature([
-      {name: User.name, schema: UserSchema},
-      {name: OTP.name, schema: OtpSchema},
+      { name: User.name, schema: UserSchema },
+      { name: OTP.name, schema: OtpSchema },
     ]),
     JwtModule.registerAsync({
       inject: [ConfigService],
@@ -30,7 +30,7 @@ import { User, UserSchema } from 'src/schema/user.schema';
     }),
     OtpSmsModule,
   ],
-  providers: [UserService,CommonService, ConfigService, UserRepository, MailerModule, OtpSmsService],
+  providers: [UserService, CommonService, ConfigService, UserRepository, MailerModule, OtpSmsService],
   controllers: [UserController]
 })
-export class UserModule {}
+export class UserModule { }

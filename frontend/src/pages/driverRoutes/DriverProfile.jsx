@@ -1,22 +1,22 @@
 import { useState, useEffect } from 'react'
 import { useSelector, useDispatch } from 'react-redux'
 import '../../styles/driver/driverProfile.css'
-import { addUser } from '../../utils/Redux/userSlice'
+import { addUser, updateUser } from '../../utils/Redux/userSlice'
 
 const DriverProfile = () => {
   const user = useSelector((store) => store.user)
   const dispatch = useDispatch()
-  
+
   const [profile, setProfile] = useState(null)
   const [loading, setLoading] = useState(true)
   const [editing, setEditing] = useState(null) // 'personal', 'vehicle', 'bank', 'password'
   const [saving, setSaving] = useState(false)
-  
+
   const [formData, setFormData] = useState({
     // Personal
     firstName: '',
     lastName: '',
-    phone: '',
+    phoneNumber: '',
     image: null,
     drivingLicence: null,
     // Vehicle
@@ -28,7 +28,6 @@ const DriverProfile = () => {
     vehicleRC: null,
     vehicleInsurance: null,
     // Bank
-    accountHolderName: '',
     accountNumber: '',
     ifscCode: '',
     bankName: '',
@@ -51,10 +50,9 @@ const DriverProfile = () => {
 
       if (!res.ok) throw new Error('Failed to fetch profile')
 
-        const data = await res.json()
-        console.log("res: ", data)
+      const data = await res.json()
       setProfile(data)
-      
+
       // Initialize form data
       setFormData({
         firstName: data.firstName || '',
@@ -82,40 +80,64 @@ const DriverProfile = () => {
   }
 
   const handleFileChange = (e) => {
-    const { name, files } = e.target
+    const { name, files } = e.target;
     if (files && files[0]) {
-      setFormData({ ...formData, [name]: files[0] })
+      setFormData((prev) => ({
+        ...prev,
+        [name]: files[0],
+      }));
     }
-  }
+  };
+
 
   const handlePersonalSubmit = async (e) => {
     e.preventDefault()
     setSaving(true)
 
     try {
-      const formDataObj = new FormData()
-      formDataObj.append('firstName', formData.firstName)
-      formDataObj.append('lastName', formData.lastName)
-      formDataObj.append('phone', formData.phone)
-      
+      const payload = {};
+      for (const key in formData) {
+        if (formData[key] !== '' && formData[key] !== user[key]) {
+          payload[key] = formData[key];
+        }
+      }
+      console.log("payload: ", payload)
+
+      // Handle image upload separately if it’s a file
+      const formDataToSend = new FormData();
+      for (const key in payload) {
+        formDataToSend.append(key, payload[key]);
+      }
+      console.log("formDataToSend: ", formDataToSend)
+
+      // if (selectedFile) {
+      //   formDataToSend.append('image', selectedFile);
+      // }
+      // formDataObj.append('firstName', formData.firstName)
+      // formDataObj.append('lastName', formData.lastName)
+      // formDataObj.append('phone', formData.phone)
+      console.log("formData image: ", formData.image)
+      console.log("formData drivingLicence: ", formData.drivingLicence)
       if (formData.image) {
-        formDataObj.append('files', formData.image)
+        formDataToSend.append('files', formData.image)
       }
       if (formData.drivingLicence) {
-        formDataObj.append('files', formData.drivingLicence)
+        formDataToSend.append('files', formData.drivingLicence)
       }
+      // console.log("formDataToSend: ", formDataToSend)
 
       const res = await fetch('http://localhost:3000/driver/updateProfile', {
         method: 'PATCH',
         credentials: 'include',
-        body: formDataObj
+        body: formDataToSend
       })
 
       if (!res.ok) throw new Error('Update failed')
 
       const data = await res.json()
-      dispatch(addUser(data.driver))
-      setProfile(data.driver)
+      console.log("data: ", data)
+      dispatch(updateUser(data))
+      setProfile(data)
       setEditing(null)
       alert('Profile updated successfully!')
     } catch (error) {
@@ -136,7 +158,7 @@ const DriverProfile = () => {
       formDataObj.append('vehicleName', formData.vehicleName)
       formDataObj.append('vehicleNumber', formData.vehicleNumber)
       formDataObj.append('vehicleColor', formData.vehicleColor)
-      
+
       if (formData.vehicleImage) {
         formDataObj.append('files', formData.vehicleImage)
       }
@@ -156,7 +178,7 @@ const DriverProfile = () => {
       if (!res.ok) throw new Error('Update failed')
 
       const data = await res.json()
-      setProfile(data.driver)
+      setProfile(data)
       setEditing(null)
       alert('Vehicle details updated successfully!')
       fetchProfile()
@@ -189,7 +211,7 @@ const DriverProfile = () => {
       if (!res.ok) throw new Error('Update failed')
 
       const data = await res.json()
-      setProfile(data.driver)
+      setProfile(data)
       setEditing(null)
       alert('Bank details updated successfully!')
     } catch (error) {
@@ -202,7 +224,7 @@ const DriverProfile = () => {
 
   const handlePasswordSubmit = async (e) => {
     e.preventDefault()
-    
+
     if (formData.newPassword !== formData.confirmNewPassword) {
       alert('New passwords do not match')
       return
@@ -314,11 +336,11 @@ const DriverProfile = () => {
               </div>
 
               <div className="form-group">
-                <label>Phone</label>
+                <label>Phone Number</label>
                 <input
                   type="tel"
-                  name="phone"
-                  value={formData.phone}
+                  name="phoneNumber"
+                  value={formData.phoneNumber}
                   onChange={handleInputChange}
                   required
                 />
@@ -329,9 +351,8 @@ const DriverProfile = () => {
                 <input
                   type="email"
                   value={profile?.emailId}
-                  disabled
+                  readOnly
                 />
-                <small>Email cannot be changed</small>
               </div>
 
               <div className="form-group">
@@ -499,9 +520,9 @@ const DriverProfile = () => {
             <div className="info-grid">
               {profile?.vehicle?.vehicleImage && (
                 <div className="vehicle-image-preview">
-                  <img 
-                    src={`http://localhost:3000/${profile.vehicle.vehicleImage}`} 
-                    alt="Vehicle" 
+                  <img
+                    src={`http://localhost:3000/${profile.vehicle.vehicleImage}`}
+                    alt="Vehicle"
                   />
                 </div>
               )}
@@ -603,7 +624,7 @@ const DriverProfile = () => {
             </form>
           ) : (
             <div className="info-grid">
-              
+
               <div className="info-item">
                 <span className="info-label">Account Number</span>
                 <span className="info-value">{profile?.bankDetails?.accountNumber || 'Not set'}</span>

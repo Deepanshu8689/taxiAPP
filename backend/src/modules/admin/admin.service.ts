@@ -32,8 +32,24 @@ export class AdminService {
     async fetchAllUsers() {
         return this.adminRepo.fetchAllUsers()
     }
-    async fetchAllDrivers() {
-        return this.adminRepo.fetchAllDrivers()
+    async fetchAllDrivers(filter?: string) {
+        return this.adminRepo.fetchAllDrivers(filter)
+    }
+
+    async getAllRides(status?: string) {
+        return this.adminRepo.getAllRides(status)
+    }
+
+    async suspendDriver(id: string){
+        return this.adminRepo.suspendDriver(id)
+    }
+
+    async getAnalytics(){
+        return this.adminRepo.getAnalytics()
+    }
+
+    async getEarnings(){
+        return this.adminRepo.getEarnings()
     }
 
 }

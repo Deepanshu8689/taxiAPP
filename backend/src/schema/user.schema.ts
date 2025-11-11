@@ -93,8 +93,8 @@ export class User {
     @Prop({ type: [{type: Types.ObjectId, ref:  'Order'}], required: true })
     orderId: Types.ObjectId[]
 
-    @Prop()
-    socketId: string
+    @Prop({default: false})
+    isSuspended: boolean
 }
 
 export type UserDocument = User & Document

@@ -54,7 +54,7 @@ export class UserRepository {
             }
 
             const isMatch = await bcrypt.compare(password, loggedInUser.password)
-            if (isMatch) {
+            if (!isMatch) {
                 throw new BadRequestException('Old password is incorrect')
             }
             const isMatchSame = await bcrypt.compare(newPassword, loggedInUser.password)

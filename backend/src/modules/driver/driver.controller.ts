@@ -13,6 +13,7 @@ import { UpdateUserDTO } from 'src/dto/updateUser.dto';
 import { LocationDTO } from 'src/dto/location.dto';
 import { UpdateDriverDTO } from 'src/dto/updateDriver.dto';
 import { BankDetailsDTO } from 'src/dto/bankDetails.dto';
+import { CloudinaryMulterConfig } from 'src/config/cloudinary.config';
 
 @Controller('driver')
 @UseGuards(AuthGuard, RoleGuard)
@@ -50,7 +51,7 @@ export class DriverController {
 
     @Patch('/updateVehicle')
     @UseInterceptors(
-        FilesInterceptor('files', 5, multerVehicleConfig)
+        FilesInterceptor('files', 5, CloudinaryMulterConfig)
     )
     async vechileDetails(
         @User() user: any,
@@ -74,13 +75,15 @@ export class DriverController {
 
     @Patch('/updateProfile')
     @UseInterceptors(
-        FilesInterceptor('files', 2, multerUserConfig)
+        FilesInterceptor('files', 2, CloudinaryMulterConfig)
     )
     async updateProfile(
+        @UploadedFiles() files: Express.Multer.File[],
         @User() user: any,
         @Body() dto: UpdateDriverDTO,
-        @UploadedFiles() files: Express.Multer.File[]
     ) {
+        console.log("user in updateProfile: ", user)
+        console.log("files: ", files)
         dto.image = files[0]?.path || '';
         dto.drivingLicence = files[1]?.path || '';
         return this.driverService.updateProfile(user, dto)

@@ -9,11 +9,13 @@ import { JwtModule } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import { Vehicle, VehicleSchema } from 'src/schema/vehicle.schema';
 import { User, UserSchema } from 'src/schema/user.schema';
+import { Ride, RideSchema } from 'src/schema/ride.schema';
 
 @Module({
   imports: [
     MongooseModule.forFeature([
       { name: User.name, schema: UserSchema },
+      { name: Ride.name, schema: RideSchema },
       { name: OTP.name, schema: OtpSchema },
       { name: Vehicle.name, schema: VehicleSchema }
     ]),

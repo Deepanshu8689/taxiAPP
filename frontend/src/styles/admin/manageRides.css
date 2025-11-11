@@ -1,0 +1,160 @@
+.manage-rides {
+  min-height: calc(100vh - 64px);
+  background-color: #f5f5f5;
+  padding: 24px;
+  margin-top: 5%;
+}
+
+.rides-list {
+  display: grid;
+  gap: 16px;
+}
+
+.ride-card-admin {
+  background: white;
+  border-radius: 16px;
+  padding: 24px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  transition: all 0.2s;
+}
+
+.ride-card-admin:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.ride-card-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.status-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+}
+
+.ride-id {
+  font-size: 13px;
+  font-weight: 600;
+  color: #6b7280;
+  font-family: monospace;
+}
+
+.ride-participants {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+  margin-bottom: 20px;
+  padding: 16px;
+  background: #f9fafb;
+  border-radius: 12px;
+}
+
+.participant {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.participant .label {
+  font-size: 12px;
+  color: #6b7280;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.user-info {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  font-weight: 600;
+  color: white;
+}
+
+.avatar.driver {
+  background: linear-gradient(135deg, #ffc107 0%, #ff9800 100%);
+}
+
+.ride-route {
+  margin-bottom: 20px;
+}
+
+.route-point {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+}
+
+.route-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  margin-top: 4px;
+  flex-shrink: 0;
+}
+
+.route-dot.pickup {
+  background: #10b981;
+}
+
+.route-dot.drop {
+  background: #ef4444;
+}
+
+.route-label {
+  display: block;
+  font-size: 12px;
+  color: #9ca3af;
+  margin-bottom: 4px;
+}
+
+.route-address {
+  display: block;
+  font-size: 14px;
+  color: #111827;
+  font-weight: 500;
+}
+
+.route-line {
+  width: 2px;
+  height: 20px;
+  background: #e5e7eb;
+  margin: 6px 0 6px 5px;
+}
+
+.ride-details {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+}
+
+.detail {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.detail-label {
+  font-size: 12px;
+  color: #9ca3af;
+  font-weight: 500;
+}
+
+.detail-value {
+  font-size: 15px;
+  color: #111827;
+  font-weight: 600;
+}

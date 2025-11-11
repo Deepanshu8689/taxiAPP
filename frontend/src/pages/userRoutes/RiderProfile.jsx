@@ -57,6 +57,7 @@ const RiderProfile = () => {
       if (selectedFile) {
         formDataToSend.append('image', selectedFile);
       }
+      console.log("formDataToSend: ", formDataToSend)
 
       const res = await fetch('http://localhost:3000/user/updateProfile', {
         method: 'PATCH',

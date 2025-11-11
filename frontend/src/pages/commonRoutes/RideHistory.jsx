@@ -17,7 +17,7 @@ const RideHistory = () => {
   const fetchRideHistory = async () => {
     try {
       setLoading(true)
-
+      console.log(`Fetching rides for user: ${user._id}`)
       const res = await fetch(`http://localhost:3000/ride/rideHistory/${user._id}`, {
         credentials: 'include'
       })

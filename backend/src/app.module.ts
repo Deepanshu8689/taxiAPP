@@ -15,8 +15,6 @@ import { WalletModule } from './modules/wallet/wallet.module';
 import { PayoutModule } from './modules/payout/payout.module';
 import { PaymentModule } from './modules/payment/payment.module';
 import { SocketModule } from './modules/socket/socket.module';
-import { SocketService } from './modules/socket/socket.service';
-
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -51,4 +49,7 @@ import { SocketService } from './modules/socket/socket.service';
   controllers: [AppController, NotificationController],
   providers: [AppService, CommonService],
 })
-export class AppModule {}
+export class AppModule {
+  constructor(){
+  }
+}

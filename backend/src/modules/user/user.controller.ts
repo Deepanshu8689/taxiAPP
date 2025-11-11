@@ -11,6 +11,7 @@ import { FileInterceptor, FilesInterceptor } from '@nestjs/platform-express';
 import { multerUserConfig, multerVehicleConfig } from 'src/config/multer.config';
 import { UpdateUserDTO } from 'src/dto/updateUser.dto';
 import { LocationDTO } from 'src/dto/location.dto';
+import { CloudinaryMulterConfig } from 'src/config/cloudinary.config';
 
 @Controller('user')
 @UseGuards(AuthGuard, RoleGuard)
@@ -48,7 +49,7 @@ export class UserController {
 
     @Patch('/updateProfile')
     @UseInterceptors(
-        FileInterceptor('image', multerUserConfig)
+        FileInterceptor('image', CloudinaryMulterConfig)
     )
     async updateProfile(
         @User() user: any,

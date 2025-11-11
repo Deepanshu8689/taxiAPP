@@ -270,11 +270,7 @@ export class RideRepository {
             const ride = await this.rideSchema.findOneAndUpdate(
                 { _id: id, driver: rideDriver._id, status: RideStatus.Accepted },
                 {
-                    $set: {
-                        driver: null,
-                        vehicle: null,
-                        status: RideStatus.Requested
-                    }
+                    status: RideStatus.Cancelled
                 },
                 { new: true }
             )
@@ -654,7 +650,14 @@ export class RideRepository {
     async getRides(id: string) {
         try {
 
-            const rides = await this.rideSchema.find().populate({
+            const rides = await this.rideSchema.find(
+                {
+                    $or: [
+                        { rider: new mongoose.Types.ObjectId(id) },
+                        { driver: new mongoose.Types.ObjectId(id) }
+                    ]
+                }
+            ).populate({
                 path: 'rider',
                 model: User.name,
             }).populate({

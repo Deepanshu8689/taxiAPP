@@ -1,5 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import NodeGeocoder from 'node-geocoder';
+import { v2 as cloudinary } from 'cloudinary';
+import * as fs from 'fs';
 
 @Injectable()
 export class CommonService {
@@ -9,6 +11,16 @@ export class CommonService {
             provider: 'opencage',
             apiKey: process.env.OPENCAGE_KEY,
         })
+    }
+
+    async deleteImage(publicId: string){
+        try {
+            const result = await cloudinary.uploader.destroy(publicId);
+            return result
+        } catch (error) {
+            console.log("error in deleteImage: ", error)
+            throw error
+        }
     }
 
     async getCoordinatesFromAddress(address: string) {
