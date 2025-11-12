@@ -80,4 +80,8 @@ export class RideService {
     async getUnpaidCompletedRide(id: string){
         return await this.rideRepo.getUnpaidCompletedRide(id)
     }
+
+    async scheduleRide(user: any, dto: RequestRideDTO){
+        return await this.rideRepo.scheduleRide(user, dto)
+    }
 }

@@ -90,6 +90,8 @@ export class User {
 
     @Prop() razorpayFundAccountId?: string
 
+    @Prop() vpa?: string
+
     @Prop({ type: [{type: Types.ObjectId, ref:  'Order'}], required: true })
     orderId: Types.ObjectId[]
 

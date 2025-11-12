@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useSelector, useDispatch } from 'react-redux'
 import '../../styles/user/riderProfile.css'
+import '../../styles/driver/driverProfile.css'
 import { addUser, updateUser } from '../../utils/Redux/userSlice'
 
 const RiderProfile = () => {
@@ -8,12 +9,15 @@ const RiderProfile = () => {
   const dispatch = useDispatch()
 
   const [isEditing, setIsEditing] = useState(false)
-  const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const [selectedFile, setSelectedFile] = useState(null)
   const [showVerifyInput, setShowVerifyInput] = useState(false);
   const [otp, setOtp] = useState("");
-  const [verifying, setVerifying] = useState(false);
+  const [verifying, setVerifying] = useState(false)
+  const [profile, setProfile] = useState(null)
+  const [loading, setLoading] = useState(true)
+  const [editing, setEditing] = useState(null) // 'personal', 'vehicle', 'bank', 'password'
+  const [saving, setSaving] = useState(false)
 
   const [formData, setFormData] = useState({
     firstName: user?.firstName ?? '',
@@ -21,43 +25,93 @@ const RiderProfile = () => {
     phoneNumber: user?.phoneNumber ?? '',
     emailId: user?.emailId ?? '',
     image: user?.image ?? '',
-    age: user?.age ?? ''
+    age: user?.age ?? '',
+    // Password
+    password: '',
+    newPassword: '',
+    confirmNewPassword: ''
   })
 
+  useEffect(() => {
+    fetchProfile()
+  }, [])
+
+  const fetchProfile = async () => {
+    try {
+      setLoading(true)
+      const res = await fetch('http://localhost:3000/user/getProfile', {
+        credentials: 'include'
+      })
+
+      if (!res.ok) throw new Error('Failed to fetch profile')
+
+      const data = await res.json()
+      setProfile(data)
+      console.log('Fetched profile:', data)
+
+      // Initialize form data
+      setFormData({
+        firstName: data.firstName || '',
+        lastName: data.lastName || '',
+        phoneNumber: data.phoneNumber || '',
+        emailId: data.emailId || '',
+        age: data.age || 0,
+        image: data.image || '',
+      })
 
 
-  const handleInputChange = (e) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value
-    })
+    } catch (error) {
+      console.error('Error fetching profile:', error)
+    } finally {
+      setLoading(false)
+    }
   }
 
-  const handleSubmit = async (e) => {
+  const handleInputChange = (e) => {
+    const { name, value } = e.target
+    setFormData({ ...formData, [name]: value })
+  }
+
+  const handleFileChange = (e) => {
+    const { name, files } = e.target;
+    if (files && files[0]) {
+      setFormData((prev) => ({
+        ...prev,
+        [name]: files[0],
+      }));
+    }
+  };
+
+  const handlePersonalSubmit = async (e) => {
     e.preventDefault()
-    setLoading(true)
+    setSaving(true)
     setError('')
 
     // console.log("Submitting form data:", JSON.stringify(formData))
     try {
 
+      const listedKeys = ['image', 'firstName', 'lastName', 'phoneNumber', 'age', 'emailId']
       const payload = {};
       for (const key in formData) {
         if (formData[key] !== '' && formData[key] !== user[key]) {
-          payload[key] = formData[key];
+          if (listedKeys.includes(key)) {
+            payload[key] = formData[key];
+          }
+          // payload[key] = formData[key];
         }
       }
 
       // Handle image upload separately if it’s a file
       const formDataToSend = new FormData();
       for (const key in payload) {
-        formDataToSend.append(key, payload[key]);
+        if (payload[key] instanceof File) {
+          console.log("key: ", key)
+          formDataToSend.append('image', payload[key]);
+          continue;
+        } else {
+          formDataToSend.append(key, payload[key]);
+        }
       }
-
-      if (selectedFile) {
-        formDataToSend.append('image', selectedFile);
-      }
-      console.log("formDataToSend: ", formDataToSend)
 
       const res = await fetch('http://localhost:3000/user/updateProfile', {
         method: 'PATCH',
@@ -65,37 +119,74 @@ const RiderProfile = () => {
         body: formDataToSend
       })
 
-      const data = await res.json()
-      console.log('Update response data:', data)
-      dispatch(updateUser(data))
-
       if (!res.ok) {
-        throw new Error(data.message || 'Update failed')
+        console.log("error: ", res)
+        throw new Error('Update failed')
       }
 
-      dispatch(addUser(data.user))
-      setIsEditing(false)
+      const data = await res.json()
+      console.log("data: ", data)
+      dispatch(updateUser(data))
+      setProfile(data)
+      setEditing(null)
       alert('Profile updated successfully!')
-
     } catch (error) {
       console.error('Update error:', error)
-      setError(error.message)
+      alert('Failed to update profile')
     } finally {
-      setLoading(false)
+      setSaving(false)
+    }
+  }
+
+  const handlePasswordSubmit = async (e) => {
+    e.preventDefault()
+
+    if (formData.newPassword !== formData.confirmNewPassword) {
+      alert('New passwords do not match')
+      return
+    }
+
+    setSaving(true)
+
+    try {
+      const res = await fetch('http://localhost:3000/driver/updatePassword', {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        credentials: 'include',
+        body: JSON.stringify({
+          password: formData.password,
+          newPassword: formData.newPassword,
+          confirmNewPassword: formData.confirmNewPassword
+        })
+      })
+
+      if (!res.ok) throw new Error('Password update failed')
+
+      setEditing(null)
+      setFormData({ ...formData, password: '', newPassword: '', confirmNewPassword: '' })
+      alert('Password updated successfully!')
+    } catch (error) {
+      console.error('Password update error:', error)
+      alert('Failed to update password')
+    } finally {
+      setSaving(false)
     }
   }
 
   const cancelEdit = () => {
-    setFormData({
-      firstName: user?.firstName || '',
-      lastName: user?.lastName || '',
-      phoneNumber: user?.phoneNumber || '',
-      emailId: user?.emailId || '',
-      image: user?.image || '',
-      age: user?.age || ''
-    })
-    setIsEditing(false)
-    setError('')
+    setEditing(null)
+    fetchProfile()
+  }
+
+  if (loading) {
+    return (
+      <div className="profile-loading">
+        <div className="spinner"></div>
+        <p>Loading profile...</p>
+      </div>
+    )
   }
 
   const sendOtpHandler = async () => {
@@ -159,16 +250,27 @@ const RiderProfile = () => {
   return (
     <div className="profile-page">
       <div className="profile-container">
-        <div className="profile-header">
-          <div className="profile-avatar-large">
-            {user?.image ? (
-              <img src={`http://localhost:3000/${user.image}`} alt="Profile" />
+
+        <div className="driver-profile-header">
+          <div className="driver-profile-avatar-large">
+            {profile?.image ? (
+              <img src={`${profile.image}`} alt="Profile" />
             ) : (
-              <span>{user?.firstName?.charAt(0)}{user?.lastName?.charAt(0)}</span>
+              <span>{profile?.firstName?.charAt(0)}{profile?.lastName?.charAt(0)}</span>
             )}
           </div>
-          <h2>{user?.firstName} {user?.lastName}</h2>
-          <p className="profile-role">Rider</p>
+          <h2>{profile?.firstName} {profile?.lastName}</h2>
+          <p className="driver-profile-role">User</p>
+          {/* <div className="driver-stats-row">
+            <div className="stat-badge">
+              <span className="stat-value">⭐ {profile?.rating?.toFixed(1) || '0.0'}</span>
+              <span className="stat-label">Rating</span>
+            </div>
+            <div className="stat-badge">
+              <span className="stat-value">🚗 {profile?.completedRides.length || 0}</span>
+              <span className="stat-label">Rides</span>
+            </div>
+          </div> */}
         </div>
 
         {error && (
@@ -178,29 +280,110 @@ const RiderProfile = () => {
         )}
 
         <div className="profile-form-card">
-          {!isEditing ? (
-            // View Mode
-            <div className="profile-info">
-              <div className="info-item">
-                <span className="info-label">First Name</span>
-                <span className="info-value">{user?.firstName}</span>
+          <div className="section-header">
+            <h3>Personal Information</h3>
+            {editing !== 'personal' && (
+              <button className="edit-icon-btn" onClick={() => setEditing('personal')}>
+                ✏️
+              </button>
+            )}
+          </div>
+
+          {editing === 'personal' ? (
+            <form onSubmit={handlePersonalSubmit} className="edit-form">
+              <div className="form-row">
+                <div className="form-group">
+                  <label>First Name</label>
+                  <input
+                    type="text"
+                    name="firstName"
+                    value={formData.firstName}
+                    onChange={handleInputChange}
+                    required
+                  />
+                </div>
+                <div className="form-group">
+                  <label>Last Name</label>
+                  <input
+                    type="text"
+                    name="lastName"
+                    value={formData.lastName}
+                    onChange={handleInputChange}
+                    required
+                  />
+                </div>
               </div>
+
+              <div className='form-row'>
+
+                <div className="form-group">
+                  <label>Phone Number</label>
+                  <input
+                    type="tel"
+                    name="phoneNumber"
+                    value={formData.phoneNumber}
+                    onChange={handleInputChange}
+                    required
+                  />
+                </div>
+                <div className="form-group">
+                  <label>Age</label>
+                  <input
+                    type="number"
+                    name="age"
+                    value={formData.age}
+                    onChange={handleInputChange}
+                    required
+                  />
+                </div>
+              </div>
+
+
+              <div className="form-group">
+                <label>Email</label>
+                <input
+                  type="email"
+                  value={profile?.emailId}
+                  readOnly
+                />
+              </div>
+
+              <div className="form-group">
+                <label>Profile Image</label>
+                <input
+                  type="file"
+                  name="image"
+                  accept="image/*"
+                  onChange={handleFileChange}
+                />
+              </div>
+
+              <div className="form-actions">
+                <button type="button" className="cancel-btn" onClick={cancelEdit}>
+                  Cancel
+                </button>
+                <button type="submit" className="save-btn" disabled={saving}>
+                  {saving ? 'Saving...' : 'Save Changes'}
+                </button>
+              </div>
+            </form>
+          ) : (
+            <div className="info-grid">
               <div className="info-item">
-                <span className="info-label">Last Name</span>
-                <span className="info-value">{user?.lastName}</span>
+                <span className="info-label">Name</span>
+                <span className="info-value">{profile?.firstName} {profile?.lastName}</span>
               </div>
               <div className="info-item">
                 <span className="info-label">Age</span>
-                <span className="info-value">{user?.age}</span>
+                <span className="info-value">{profile?.age}</span>
               </div>
               <div className="info-item">
-                <span className="info-label">EmailId</span>
-                <span className="info-value">{user?.emailId}</span>
+                <span className="info-label">Email</span>
+                <span className="info-value">{profile?.emailId}</span>
               </div>
               <div className="info-item">
                 <span className="info-label">Phone Number</span>
-                <span className="info-value">{user?.phoneNumber}</span>
-
+                <span className="info-value">{profile?.phoneNumber}</span>
                 {user?.isPhoneVerified ? (
                   <span className="verified-badge">✅ Verified</span>
                 ) : (
@@ -240,96 +423,63 @@ const RiderProfile = () => {
                 )}
               </div>
 
-              <button
-                className="edit-btn"
-                onClick={() => setIsEditing(true)}
-              >
-                Edit Profile
-              </button>
             </div>
-          ) : (
-            // Edit Mode
+          )}
 
-            <form onSubmit={handleSubmit} className="profile-form">
-              <div className="form-group">
-                <label htmlFor="image">Profile Image</label>
-                <input
-                  id="image"
-                  type="file"
-                  name="image"
-                  accept="image/*"
-                  onChange={(e) => setSelectedFile(e.target.files[0])}
-                />
-              </div>
-              <div className="form-group">
-                <label htmlFor="firstName">First Name</label>
-                <input
-                  id="firstName"
-                  type="text"
-                  name="firstName"
-                  value={formData.firstName}
-                  onChange={handleInputChange}
-                />
-              </div>
+        </div>
 
+        {/* password change */}
+        <div className="profile-section">
+          <div className="section-header">
+            <h3>Change Password</h3>
+            {editing !== 'password' && (
+              <button className="edit-icon-btn" onClick={() => setEditing('password')}>
+                ✏️
+              </button>
+            )}
+          </div>
+
+          {editing === 'password' && (
+            <form onSubmit={handlePasswordSubmit} className="edit-form">
               <div className="form-group">
-                <label htmlFor="lastName">Last Name</label>
+                <label>Current Password</label>
                 <input
-                  id="lastName"
-                  type="text"
-                  name="lastName"
-                  value={formData.lastName}
+                  type="password"
+                  name="password"
+                  value={formData.password}
                   onChange={handleInputChange}
+                  required
                 />
               </div>
 
               <div className="form-group">
-                <label htmlFor="emailId">Email Id</label>
+                <label>New Password</label>
                 <input
-                  id="emailId"
-                  type="email"
-                  name="emailId"
-                  value={formData.emailId}
+                  type="password"
+                  name="newPassword"
+                  value={formData.newPassword}
                   onChange={handleInputChange}
+                  required
                 />
               </div>
 
               <div className="form-group">
-                <label htmlFor="phoneNumber">Phone Number</label>
+                <label>Confirm New Password</label>
                 <input
-                  id="phoneNumber"
-                  type="tel"
-                  name="phoneNumber"
-                  value={formData.phoneNumber}
+                  type="password"
+                  name="confirmNewPassword"
+                  value={formData.confirmNewPassword}
                   onChange={handleInputChange}
-                />
-              </div>
-              <div className="form-group">
-                <label htmlFor="age">Age</label>
-                <input
-                  id="age"
-                  type="number"
-                  name="age"
-                  value={formData.age}
-                  onChange={handleInputChange}
+                  required
                 />
               </div>
 
               <div className="form-actions">
-                <button
-                  type="button"
-                  className="cancel-btn"
-                  onClick={cancelEdit}
-                  disabled={loading}
-                >
+                <button type="button" className="cancel-btn" onClick={cancelEdit}>
                   Cancel
                 </button>
-                <button
-                  type="submit"
-                  className="save-btn"
-                  disabled={loading}
-                >
-                  {loading ? 'Saving...' : 'Save Changes'}
+                <button type="submit" className="save-btn" disabled={saving}>
+                  {saving ? 'Updating...' : 'Update Password'}
                 </button>
               </div>
             </form>

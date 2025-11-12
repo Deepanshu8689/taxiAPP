@@ -17,6 +17,7 @@ const DriverHomePage = () => {
     const [acceptingRide, setAcceptingRide] = useState(null)
 
     useEffect(() => {
+        fetchRequestedRides()
         currentRide()
     }, [])
 
@@ -69,10 +70,6 @@ const DriverHomePage = () => {
     }
 
     useEffect(() => {
-        fetchRequestedRides()
-    }, [])
-
-    useEffect(() => {
         const socket = createSocketConnection()
         socketRef.current = socket
 
@@ -81,6 +78,10 @@ const DriverHomePage = () => {
             if (ride) {
                 setRequestedRides((rides) => [...rides, ride]);
             }
+        })
+
+        socketRef.current.on('FE-ride-accepted', (acceptedRideId) => {
+            setRequestedRides((rides) => rides.filter(ride => ride._id !== acceptedRideId))
         })
 
         socketRef.current.on('FE-ride-cancelled', (rideId) => {

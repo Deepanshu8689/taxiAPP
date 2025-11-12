@@ -11,6 +11,8 @@ import { CommonService } from '../common/common.service';
 import { Vehicle, VehicleSchema } from 'src/schema/vehicle.schema';
 import { User, UserSchema } from 'src/schema/user.schema';
 import { PayoutService } from '../payout/payout.service';
+import { CloudinaryService } from '../cloudinary/cloudinary.service';
+import { WalletService } from '../wallet/wallet.service';
 
 @Module({
   imports: [
@@ -31,7 +33,7 @@ import { PayoutService } from '../payout/payout.service';
     }),
     OtpSmsModule
   ],
-  providers: [DriverService, DriverRepository, CommonService, PayoutService],
+  providers: [DriverService, DriverRepository, WalletService, CommonService, PayoutService, CloudinaryService],
   controllers: [DriverController]
 })
 export class DriverModule { }

@@ -14,7 +14,11 @@ async function bootstrap() {
   app.use(cookieParser())
   app.useGlobalPipes(new ValidationPipe({
     whitelist: true,
-    forbidNonWhitelisted: true
+    transform: true,
+    forbidNonWhitelisted: true,
+    transformOptions: {
+      enableImplicitConversion: true
+    }
   }))
   app.enableCors({
     origin: "http://localhost:5173", // React dev server

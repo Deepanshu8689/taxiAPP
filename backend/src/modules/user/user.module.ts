@@ -11,6 +11,7 @@ import { OtpSmsService } from '../otp-sms/otp-sms.service';
 import { OtpSmsModule } from '../otp-sms/otp-sms.module';
 import { CommonService } from '../common/common.service';
 import { User, UserSchema } from 'src/schema/user.schema';
+import { CloudinaryService } from '../cloudinary/cloudinary.service';
 
 @Module({
   imports: [
@@ -30,7 +31,7 @@ import { User, UserSchema } from 'src/schema/user.schema';
     }),
     OtpSmsModule,
   ],
-  providers: [UserService, CommonService, ConfigService, UserRepository, MailerModule, OtpSmsService],
+  providers: [UserService, CommonService, CloudinaryService, ConfigService, UserRepository, MailerModule, OtpSmsService],
   controllers: [UserController]
 })
 export class UserModule { }

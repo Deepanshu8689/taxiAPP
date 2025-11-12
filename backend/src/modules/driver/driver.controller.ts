@@ -14,6 +14,8 @@ import { LocationDTO } from 'src/dto/location.dto';
 import { UpdateDriverDTO } from 'src/dto/updateDriver.dto';
 import { BankDetailsDTO } from 'src/dto/bankDetails.dto';
 import { CloudinaryMulterConfig } from 'src/config/cloudinary.config';
+import { CloudinaryService } from '../cloudinary/cloudinary.service';
+import { WalletService } from '../wallet/wallet.service';
 
 @Controller('driver')
 @UseGuards(AuthGuard, RoleGuard)
@@ -21,7 +23,9 @@ import { CloudinaryMulterConfig } from 'src/config/cloudinary.config';
 export class DriverController {
     constructor(
         private driverService: DriverService,
-        private otpService: OtpSmsService
+        private otpService: OtpSmsService,
+        private cloudinaryService: CloudinaryService,
+        private walletService: WalletService
     ) { }
 
     @Get('/getProfile')
@@ -51,17 +55,24 @@ export class DriverController {
 
     @Patch('/updateVehicle')
     @UseInterceptors(
-        FilesInterceptor('files', 5, CloudinaryMulterConfig)
+        FilesInterceptor('files')
     )
     async vechileDetails(
         @User() user: any,
         @Body() dto: VehicleDTO,
         @UploadedFiles() files: Express.Multer.File[]
     ) {
-        console.log("files: ", files)
-        dto.vehicleImage = files[0]?.path || '';
-        dto.vehicleRC = files[1]?.path || '';
-        dto.vehicleInsurance = files[2]?.path || '';
+
+        if(files && files.length > 0){
+            const urls = await this.cloudinaryService.uploadMultiple(files, 'taxi-app')
+            dto.vehicleImage = urls[0];
+            dto.vehicleRC = urls[1];
+            dto.vehicleInsurance = urls[2];
+        }
+        else{
+            throw new Error("Please upload vehicle documents")
+        }
+        
         return this.driverService.updateVehicleDetails(user, dto)
     }
 
@@ -75,17 +86,21 @@ export class DriverController {
 
     @Patch('/updateProfile')
     @UseInterceptors(
-        FilesInterceptor('files', 2, CloudinaryMulterConfig)
+        FilesInterceptor('files')
     )
     async updateProfile(
         @UploadedFiles() files: Express.Multer.File[],
         @User() user: any,
         @Body() dto: UpdateDriverDTO,
     ) {
-        console.log("user in updateProfile: ", user)
-        console.log("files: ", files)
-        dto.image = files[0]?.path || '';
-        dto.drivingLicence = files[1]?.path || '';
+        console.log("dto: ", dto)
+
+        if(files && files.length > 0){
+            const urls = await this.cloudinaryService.uploadMultiple(files, 'taxi-app')
+            dto.image = urls[0];
+            dto.drivingLicence = urls[1];
+        }
+        console.log("dto: ", dto)
         return this.driverService.updateProfile(user, dto)
     }
 
@@ -103,5 +118,7 @@ export class DriverController {
     async bankDetails(@User() user: any, @Body() dto: BankDetailsDTO){
         return await this.driverService.bankDetails(user, dto)
     }
+
+    
 
 }

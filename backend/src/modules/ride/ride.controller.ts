@@ -36,6 +36,11 @@ export class RideController {
     async getUnpaidCompletedRide(@User() user: any){
         return await this.rideService.getUnpaidCompletedRide(user.sub)
     }
+    
+    @Get('/getRequestedRide')
+    async getRequestedRide(@User() user: any){
+        return await this.rideService.getRequestedRide(user.sub)
+    }
 
     @Post('/getFares')
     @Roles(Role.User)
@@ -45,12 +50,7 @@ export class RideController {
     ){
         return await this.rideService.getFares(dto, user)
     }
-    
 
-    @Get('/getRequestedRide')
-    async getRequestedRide(@User() user: any){
-        return await this.rideService.getRequestedRide(user.sub)
-    }
 
     @Post('/requestRide')
     @Roles(Role.User)
@@ -122,5 +122,14 @@ export class RideController {
     @Get('/getRide/:rideId')
     async getRideById(@Param('rideId') id: string){
         return await this.rideService.getRideById(id)
+    }
+
+    @Post('/scheduleRide')
+    @Roles(Role.User)
+    async scheduleRide(
+        @User() user: any,
+        @Body() dto: RequestRideDTO    
+    ){
+        return await this.rideService.scheduleRide(user, dto)
     }
 }

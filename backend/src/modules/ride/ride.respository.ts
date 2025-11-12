@@ -560,6 +560,7 @@ export class RideRepository {
                 _id: rideId,
                 status: RideStatus.Completed
             })
+            console.log("ride: ", ride)
 
             if (!ride) {
                 throw new Error("Ride not found")
@@ -676,6 +677,10 @@ export class RideRepository {
             console.log("error in getRides: ", error)
             throw error
         }
+    }
+
+    async scheduleRide(user: any, dto: RequestRideDTO){
+        
     }
 
 }

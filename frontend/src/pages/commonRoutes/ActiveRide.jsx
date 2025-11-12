@@ -24,7 +24,7 @@ const ActiveRide = () => {
       console.log("ride completed: ", completedRide)
       if(user.role === 'driver') {
         alert("Ride completed successfully")
-        navigate('/driver/completed-ride')
+        navigate(`/driver/completed/${completedRide._id}`)
       }
       else{
         navigate(`/rider/payment/${completedRide._id}`)

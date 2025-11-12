@@ -115,7 +115,7 @@ function App() {
             <Route path="payment/:rideId" element={<RidePayment />} />
             <Route path="profile" element={<RiderProfile />} />
             <Route path="history" element={<RideHistory />} />
-            <Route path="complete/:rideId" element={<CompletedRide />} />
+            {/* <Route path="complete/:rideId" element={<CompletedRide />} /> */}
           </Route>
 
 
@@ -135,7 +135,7 @@ function App() {
             <Route path="active-ride" element={<ActiveRide />} />
             <Route path="profile" element={<DriverProfile />} />
             <Route path="earnings" element={<DriverEarnings />} />
-            <Route path="complete/:rideId" element={<CompletedRide />} />
+            <Route path="completed/:rideId" element={<CompletedRide />} />
             <Route path="history" element={<RideHistory />} />
 
           </Route>

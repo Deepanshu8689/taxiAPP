@@ -15,6 +15,9 @@ import { WalletModule } from './modules/wallet/wallet.module';
 import { PayoutModule } from './modules/payout/payout.module';
 import { PaymentModule } from './modules/payment/payment.module';
 import { SocketModule } from './modules/socket/socket.module';
+import { CloudinaryModule } from './modules/cloudinary/cloudinary.module';
+import { v2 as cloudinary } from 'cloudinary';
+import { ChatModule } from './modules/chat/chat.module';
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -45,11 +48,19 @@ import { SocketModule } from './modules/socket/socket.module';
     PayoutModule,
     PaymentModule,
     SocketModule,
+    CloudinaryModule,
+    ChatModule,
   ],
   controllers: [AppController, NotificationController],
   providers: [AppService, CommonService],
 })
 export class AppModule {
   constructor(){
+    cloudinary.config({
+      cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+      api_key: process.env.CLOUDINARY_API_KEY,
+      api_secret: process.env.CLOUDINARY_API_SECRET,
+    })
+    console.log("cloudinary Initialized")
   }
 }

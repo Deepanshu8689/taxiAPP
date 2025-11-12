@@ -40,7 +40,7 @@ const DriverEarnings = () => {
       return
     }
 
-    if (!profile?.bankDetails?.accountNumber) {
+    if (!profile?.razorpayFundAccountId) {
       alert('Please add your bank details first')
       return
     }
@@ -143,7 +143,7 @@ const DriverEarnings = () => {
         </div>
 
         {/* Bank Details Status */}
-        {!profile?.bankDetails?.accountNumber && (
+        {!profile?.razorpayFundAccountId && (
           <div className="bank-warning">
             <span>⚠️</span>
             <div>
@@ -157,7 +157,7 @@ const DriverEarnings = () => {
         )}
 
         {/* Withdraw Button */}
-        {profile?.availableBalance > 0 && profile?.bankDetails?.accountNumber && (
+        {profile?.availableBalance > 0 && profile?.razorpayFundAccountId && (
           <button 
             className="withdraw-btn"
             onClick={handleWithdraw}

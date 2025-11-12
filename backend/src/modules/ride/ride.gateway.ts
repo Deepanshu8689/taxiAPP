@@ -184,17 +184,26 @@ export class RideGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
       if (!ride) {
         throw new Error('Ride not found in gateway')
       }
+      const drivers = await this.rideReop.findDrivers(ride._id)
       const rider = ride.rider
       const driver = ride.driver
 
 
       const riderSocketId = await this.socketService.getSocketIdByUserId(rider)
+      const driverId = await this.socketService.getSocketIdByUserId(driver)
 
       if (riderSocketId) {
         this.io.to(riderSocketId).emit('FE-ride-accepted', ride)
       }
       else {
         console.log("Rider not connected via socket")
+      }
+      
+      for (const driver of drivers) {
+        const socketId = await this.socketService.getSocketIdByUserId(String(driver._id))
+        if (socketId !== driverId) {
+          this.io.to(socketId).emit('FE-ride-accepted', ride._id)
+        }
       }
 
       return { message: 'Ride accepted by driver', ride };

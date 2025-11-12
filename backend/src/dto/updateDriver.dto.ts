@@ -10,7 +10,7 @@ export class UpdateDriverDTO {
     @IsOptional()
     lastName: string
 
-    @IsInt()
+    @IsNumber()
     @IsOptional()
     age: number
 

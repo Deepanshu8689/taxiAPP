@@ -57,24 +57,8 @@ const RidePayment = () => {
 
         try {
             setProcessing(true)
-            const res = await fetch(`http://localhost:3000/ride/finalizeEarning/${rideId}`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                credentials: 'include',
-                body: JSON.stringify({ paymentMethod: 'cash' })
-            })
-
-            if (!res.ok) {
-                throw new Error('Payment processing failed')
-            }
-
-            const data = await res.json()
-            console.log('Payment completed:', data)
-
             alert(`Payment confirmed successfully!
-        Back to homePage`)
+            \nBack to homePage`)
             navigate(`/rider/request`)
         } catch (error) {
             console.error('Payment error:', error)

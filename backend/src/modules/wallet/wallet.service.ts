@@ -12,21 +12,21 @@ export class WalletService {
     async deductMoneyFromCash(driverId: string, grossAmount: number, totalCut: number) {
         try {
             const netAmount = grossAmount - totalCut
-            const driver = await this.userSchema.findByIdAndUpdate(
-                {_id: driverId},
-                {
-                    $inc: {
-                        pendingBalance: -totalCut,
-                        totalEarnings: +grossAmount,
-                    }
-                },
-                {new: true}
-            )
+            const driver = await this.userSchema.findById(driverId)
+            
+            if(!driver){
+                throw new Error("Driver not found")
+            }
+
+            driver.pendingBalance += totalCut
+            driver.availableBalance += netAmount
+            driver.totalEarnings += grossAmount
 
             driver.pendingBalance = Number(driver.pendingBalance.toFixed(2))
             driver.availableBalance = Number(driver.availableBalance.toFixed(2))
             driver.totalEarnings = Number(driver.totalEarnings.toFixed(2))
             await driver.save()
+            console.log("driver: ", driver)
 
             return {
                 pendingBalance: driver.pendingBalance,
@@ -42,12 +42,12 @@ export class WalletService {
 
     async deductMoneyFromOnline(driverId: string, grossAmount: number, totalCut: number) {
         try {
-            const netAmount = grossAmount - totalCut
-
+            
             const driver = await this.userSchema.findById(driverId)
             if(!driver) {
                 throw new Error("Driver not found")
             }
+            const netAmount = grossAmount - totalCut
 
             const balance = netAmount - driver.pendingBalance 
             if(balance < 0) {

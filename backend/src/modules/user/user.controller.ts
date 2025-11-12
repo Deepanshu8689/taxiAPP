@@ -12,6 +12,7 @@ import { multerUserConfig, multerVehicleConfig } from 'src/config/multer.config'
 import { UpdateUserDTO } from 'src/dto/updateUser.dto';
 import { LocationDTO } from 'src/dto/location.dto';
 import { CloudinaryMulterConfig } from 'src/config/cloudinary.config';
+import { CloudinaryService } from '../cloudinary/cloudinary.service';
 
 @Controller('user')
 @UseGuards(AuthGuard, RoleGuard)
@@ -19,7 +20,8 @@ import { CloudinaryMulterConfig } from 'src/config/cloudinary.config';
 export class UserController {
     constructor(
         private readonly userService: UserService,
-        private otpService: OtpSmsService
+        private otpService: OtpSmsService,
+        private cloudinaryService: CloudinaryService
     ) { }
 
     @Get('/getProfile')
@@ -49,14 +51,18 @@ export class UserController {
 
     @Patch('/updateProfile')
     @UseInterceptors(
-        FileInterceptor('image', CloudinaryMulterConfig)
+        FileInterceptor('image')
     )
     async updateProfile(
         @User() user: any,
         @Body() dto: UpdateUserDTO,
         @UploadedFile() image: Express.Multer.File
     ) {
-        dto.image = image?.path || '';
+        if(image){
+            const url = await this.cloudinaryService.uploadImage(image, 'taxi-app')   
+            console.log("url: ", url)
+            dto.image = url
+        }
         return this.userService.updateProfile(user, dto)
     }
 
