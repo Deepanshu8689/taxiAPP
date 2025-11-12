@@ -680,7 +680,9 @@ export class RideRepository {
     }
 
     async scheduleRide(user: any, dto: RequestRideDTO){
-        
+        return {
+            message: "Ride scheduled successfully"
+        }
     }
 
 }

@@ -12,7 +12,7 @@ import * as cookie from 'cookie';
     origin: "http://localhost:5173",
     credentials: true
   },
-  transports: ['websocket', 'polling']
+  transports: ['websocket']
 })
 
 @WebSocketGateway()
@@ -198,7 +198,7 @@ export class RideGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
       else {
         console.log("Rider not connected via socket")
       }
-      
+
       for (const driver of drivers) {
         const socketId = await this.socketService.getSocketIdByUserId(String(driver._id))
         if (socketId !== driverId) {
