@@ -22,7 +22,6 @@ export class AdminController {
         return await this.adminService.getProfile(user);
     }
 
-    // @Roles(Role.Admin)
     @Patch('/verifyVehicle/:id')
     async verifyVehicle(
         @Param('id') id: string,

@@ -2,6 +2,7 @@
 .admin-layout {
   min-height: 100vh;
   display: flex;
+  margin-top: 5%;
   flex-direction: column;
   background-color: #f5f5f5;
 }

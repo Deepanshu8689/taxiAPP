@@ -311,7 +311,7 @@ const ManageDrivers = () => {
                       <div className="document-viewer">
                         <h4>Vehicle Image</h4>
                         <img 
-                          src={`http://localhost:3000/${selectedDriver.vehicle.vehicleImage}`}
+                          src={`${selectedDriver.vehicle.vehicleImage}`}
                           alt="Vehicle"
                         />
                       </div>
@@ -324,7 +324,7 @@ const ManageDrivers = () => {
                   <div className="documents-list">
                     {selectedDriver.drivingLicence && (
                       <a 
-                        href={`http://localhost:3000/${selectedDriver.drivingLicence}`}
+                        href={`${selectedDriver.drivingLicence}`}
                         target="_blank"
                         rel="noreferrer"
                         className="document-link"
@@ -334,7 +334,7 @@ const ManageDrivers = () => {
                     )}
                     {selectedDriver.vehicle?.vehicleRC && (
                       <a 
-                        href={`http://localhost:3000/${selectedDriver.vehicle.vehicleRC}`}
+                        href={`${selectedDriver.vehicle.vehicleRC}`}
                         target="_blank"
                         rel="noreferrer"
                         className="document-link"
@@ -344,7 +344,7 @@ const ManageDrivers = () => {
                     )}
                     {selectedDriver.vehicle?.vehicleInsurance && (
                       <a 
-                        href={`http://localhost:3000/${selectedDriver.vehicle.vehicleInsurance}`}
+                        href={`${selectedDriver.vehicle.vehicleInsurance}`}
                         target="_blank"
                         rel="noreferrer"
                         className="document-link"

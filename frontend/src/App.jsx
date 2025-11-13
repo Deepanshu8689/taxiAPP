@@ -34,6 +34,8 @@ import DriverLayout from "./pages/layouts/DriverLayout";
 import DriverProfile from "./pages/driverRoutes/DriverProfile";
 import DriverEarnings from "./pages/driverRoutes/DriverEarnings";
 import CompletedRide from "./pages/commonRoutes/CompletedRide";
+import AdminSupportDashboard from "./pages/adminRoutes/AdminSupportDashboard";
+import SupportChat from "./pages/commonRoutes/SupportChat";
 
 // Protected Route Components
 const ProtectedRoute = ({ children, allowedRoles }) => {
@@ -115,6 +117,7 @@ function App() {
             <Route path="payment/:rideId" element={<RidePayment />} />
             <Route path="profile" element={<RiderProfile />} />
             <Route path="history" element={<RideHistory />} />
+            <Route path="support" element={<SupportChat />} />
             {/* <Route path="complete/:rideId" element={<CompletedRide />} /> */}
           </Route>
 
@@ -137,6 +140,8 @@ function App() {
             <Route path="earnings" element={<DriverEarnings />} />
             <Route path="completed/:rideId" element={<CompletedRide />} />
             <Route path="history" element={<RideHistory />} />
+            <Route path="support" element={<SupportChat />} />
+
 
           </Route>
 
@@ -156,6 +161,7 @@ function App() {
             <Route path="drivers" element={<ManageDrivers />} />
             <Route path="rides" element={<ManageRides />} />
             <Route path="analytics" element={<Analytics />} />
+            <Route path="support-dashboard" element={<AdminSupportDashboard />} />
           </Route>
 
 

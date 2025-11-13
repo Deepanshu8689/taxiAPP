@@ -18,6 +18,7 @@ const DriverProfile = () => {
     lastName: '',
     phoneNumber: '',
     age: 0,
+    drivingExperience: 0,
     image: null,
     drivingLicence: null,
     // Vehicle
@@ -31,7 +32,7 @@ const DriverProfile = () => {
     vehicleInsurance: null,
     // Bank
     accountNumber: '',
-    ifscCode: '',
+    IFSCcode: '',
     type: '',
     // Password
     password: '',
@@ -62,6 +63,9 @@ const DriverProfile = () => {
         lastName: data.lastName || '',
         phoneNumber: data.phoneNumber || '',
         age: data.age || 0,
+        drivingExperience: data.drivingExperience || 0,
+        image: data.image || '',
+        drivingLicence: data.drivingLicence || '',
         vehicleType: data.vehicle?.vehicleType || '',
         vehicleName: data.vehicle?.vehicleName || '',
         vehicleNumber: data.vehicle?.vehicleNumber || '',
@@ -101,7 +105,7 @@ const DriverProfile = () => {
     setSaving(true)
 
     try {
-      const listedKeys = ['image', 'drivingLicence', 'firstName', 'lastName', 'phoneNumber', 'age']
+      const listedKeys = ['image', 'drivingLicence', 'firstName', 'lastName', 'phoneNumber', 'age', 'drivingExperience']
       const payload = {};
       for (const key in formData) {
         if (formData[key] !== '' && formData[key] !== user[key]) {
@@ -215,8 +219,9 @@ const DriverProfile = () => {
         },
         credentials: 'include',
         body: JSON.stringify({
+          type: formData.type,
           accountNumber: formData.accountNumber,
-          ifscCode: formData.ifscCode,
+          IFSCcode: formData.IFSCcode,
         })
       })
 
@@ -276,6 +281,120 @@ const DriverProfile = () => {
     fetchProfile()
   }
 
+  const sendOtpHandler = async () => {
+    setShowVerifyInput(true)
+    try {
+      const res = await fetch('http://localhost:3000/driver/sendOtp', {
+        method: 'Post',
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      })
+
+      const data = await res.json()
+
+      if (data.generatedOtp) {
+        setShowVerifyInput(true)
+      }
+
+    } catch (error) {
+      console.log("error in send otp Handler: ", error)
+      throw error
+    }
+  }
+
+  const handleVerifyOtp = async (e) => {
+    e.preventDefault()
+    try {
+
+      const res = await fetch('http://localhost:3000/driver/verifyEmail', {
+        method: 'Post',
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ otp: otp })
+      })
+
+      if (!res.ok) {
+        throw new Error("Invalid OTP")
+      }
+
+      const data = await res.json()
+
+      if (data) {
+        alert("Email verified")
+      }
+
+      dispatch(updateUser({ isEmailVerified: true }))
+      setShowVerifyInput(false)
+      setVerifying(false)
+      setOtp('')
+
+    } catch (error) {
+      console.log("error in handleVerifyOtp: ", error)
+      throw error
+    }
+  }
+
+  const sendSmsHandler = async () => {
+    setShowVerifyInput(true)
+    try {
+      const res = await fetch('http://localhost:3000/driver/sendSms', {
+        method: 'Post',
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      })
+
+      const data = await res.json()
+
+      if (data.savedOtp) {
+        setShowVerifyInput(true)
+      }
+
+    } catch (error) {
+      console.log("error in send sms Handler: ", error)
+      throw error
+    }
+  }
+
+  const handleVerifySms = async (e) => {
+    e.preventDefault()
+    try {
+
+      const res = await fetch('http://localhost:3000/user/verifyPhone', {
+        method: 'Post',
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ sms: otp })
+      })
+
+      if (!res.ok) {
+        throw new Error("Invalid OTP")
+      }
+
+      const data = await res.json()
+
+      if (data) {
+        alert("Phone number verified")
+      }
+
+      dispatch(updateUser({ isPhoneVerified: true }))
+      setShowVerifyInput(false)
+      setVerifying(false)
+      setOtp('')
+
+    } catch (error) {
+      console.log("error in handleVerifySms: ", error)
+      throw error
+    }
+  }
+
   if (loading) {
     return (
       <div className="profile-loading">
@@ -284,6 +403,7 @@ const DriverProfile = () => {
       </div>
     )
   }
+
 
   return (
     <div className="driver-profile-page">
@@ -347,8 +467,6 @@ const DriverProfile = () => {
                 </div>
               </div>
 
-              <div className='form-row'>
-
                 <div className="form-group">
                   <label>Phone Number</label>
                   <input
@@ -359,12 +477,24 @@ const DriverProfile = () => {
                     required
                   />
                 </div>
+              <div className='form-row'>
+
                 <div className="form-group">
                   <label>Age</label>
                   <input
                     type="number"
                     name="age"
                     value={formData.age}
+                    onChange={handleInputChange}
+                    required
+                  />
+                </div>
+                <div className="form-group">
+                  <label>Driving Experience</label>
+                  <input
+                    type="number"
+                    name="drivingExperience"
+                    value={formData.drivingExperience}
                     onChange={handleInputChange}
                     required
                   />
@@ -421,12 +551,90 @@ const DriverProfile = () => {
                 <span className="info-value">{profile?.age}</span>
               </div>
               <div className="info-item">
+                <span className="info-label">Driving Experience</span>
+                <span className="info-value">{profile?.drivingExperience}</span>
+              </div>
+              <div className="info-item">
                 <span className="info-label">Email</span>
                 <span className="info-value">{profile?.emailId}</span>
+                {user?.isEmailVerified ? (
+                  <span className="verified-badge">✅ Verified</span>
+                ) : (
+                  <div className="verify-container">
+                    {(!showVerifyInput && !user?.isEmailVerified) ? (
+                      <button className="verify-btn" onClick={sendOtpHandler}>
+                        Verify
+                      </button>
+                    ) : (
+                      <div className="verify-input-wrapper">
+                        <input
+                          type="text"
+                          placeholder="Enter OTP"
+                          className="verify-input"
+                          value={otp}
+                          onChange={(e) => setOtp(e.target.value)}
+                        />
+                        <button
+                          className="verify-submit-btn"
+                          onClick={handleVerifyOtp}
+                          disabled={verifying}
+                        >
+                          {verifying ? "Verifying..." : "Submit"}
+                        </button>
+                        <button
+                          className="verify-cancel-btn"
+                          onClick={() => {
+                            setShowVerifyInput(false);
+                            setOtp("");
+                          }}
+                        >
+                          ✕
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                )}
               </div>
               <div className="info-item">
                 <span className="info-label">Phone Number</span>
                 <span className="info-value">{profile?.phoneNumber}</span>
+                {user?.isPhoneVerified ? (
+                  <span className="verified-badge">✅ Verified</span>
+                ) : (
+                  <div className="verify-container">
+                    {(!showVerifyInput && !user?.isPhoneVerified) ? (
+                      <button className="verify-btn" onClick={sendSmsHandler}>
+                        Verify
+                      </button>
+                    ) : (
+                      <div className="verify-input-wrapper">
+                        <input
+                          type="text"
+                          placeholder="Enter OTP"
+                          className="verify-input"
+                          value={otp}
+                          onChange={(e) => setOtp(e.target.value)}
+                        />
+                        <button
+                          className="verify-submit-btn"
+                          onClick={handleVerifySms}
+                          disabled={verifying}
+                        >
+                          {verifying ? "Verifying..." : "Submit"}
+                        </button>
+                        <button
+                          className="verify-cancel-btn"
+                          onClick={() => {
+                            setShowVerifyInput(false);
+                            setOtp("");
+                          }}
+                        >
+                          ✕
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                )}
               </div>
               <div className="info-item">
                 <span className="info-label">Driving Licence</span>
@@ -451,7 +659,25 @@ const DriverProfile = () => {
                 ✏️
               </button>
             )}
+
           </div>
+          {user.vehicle && <div className='section-header'>
+            {user?.vehicle.isVehicleVerified ? (
+            <span className="verified-badge">✅ Verified</span>
+          ) : (
+              <>
+            {
+              user?.vehicle?.vehicleNumber ? (
+                <span className="verified-badge">Complete Vehicle Details</span>
+              ) : (
+                <span className="verified-badge">Verification Pending</span>
+              ) 
+            }
+            </>
+              
+            
+          )}
+          </div>}
 
           {editing === 'vehicle' ? (
             <form onSubmit={handleVehicleSubmit} className="edit-form">
@@ -652,8 +878,8 @@ const DriverProfile = () => {
                     <label>IFSC Code</label>
                     <input
                       type="text"
-                      name="ifscCode"
-                      value={formData.ifscCode}
+                      name="IFSCcode"
+                      value={formData.IFSCcode}
                       onChange={handleInputChange}
                       required
                     />

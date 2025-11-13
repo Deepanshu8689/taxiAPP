@@ -107,6 +107,14 @@ const AdminLayout = () => {
                 <line x1="6" y1="20" x2="6" y2="14" />
               </svg>
               <span>Analytics</span>
+
+            </NavLink>
+            <NavLink to="/admin/support-dashboard" className="nav-link">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M12 1a10 10 0 0 0-10 10v3a4 4 0 0 0 4 4h1v-6H6a1 1 0 0 1-1-1v-1a7 7 0 0 1 14 0v1a1 1 0 0 1-1 1h-1v6h1a4 4 0 0 0 4-4v-3A10 10 0 0 0 12 1z" />
+              </svg>
+
+              <span>Support</span>
             </NavLink>
           </nav>
 

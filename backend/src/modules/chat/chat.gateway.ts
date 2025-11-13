@@ -1,9 +1,10 @@
-import { OnGatewayConnection, OnGatewayDisconnect, OnGatewayInit, SubscribeMessage, WebSocketGateway, WebSocketServer } from '@nestjs/websockets';
+import { ConnectedSocket, MessageBody, OnGatewayConnection, OnGatewayDisconnect, OnGatewayInit, SubscribeMessage, WebSocketGateway, WebSocketServer } from '@nestjs/websockets';
 import { RideRepository } from '../ride/ride.respository';
 import { JwtService } from '@nestjs/jwt';
 import { SocketService } from '../socket/socket.service';
 import { Server, Socket } from 'socket.io';
 import * as cookie from 'cookie';
+import { ChatService } from './chat.service';
 
 @WebSocketGateway({
   cors: {
@@ -20,6 +21,7 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
       private rideReop: RideRepository,
       private jwtService: JwtService,
       private socketService: SocketService,
+      private chatService: ChatService
     ) { }
   
     @WebSocketServer()
@@ -79,8 +81,11 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
       }
     }
 
-  @SubscribeMessage('message')
-  handleMessage(client: any, payload: any): string {
+  @SubscribeMessage('BE-join-chat')
+  handleJoinChat(
+    @MessageBody() data: { sender: any, receiver: any },
+    @ConnectedSocket() socket: Socket
+  ) {
     return 'Hello world!';
   }
 }

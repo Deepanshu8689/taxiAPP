@@ -25,7 +25,6 @@ export class UpdateDriverDTO {
     drivingLicence?: string
 
     @IsOptional()
-    // @Min(2)
     drivingExperience?: number
 
     @IsString()

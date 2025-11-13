@@ -11,6 +11,7 @@ export class SocketService {
 
     // Upsert: ensures single active socketId per user
   async saveConnection(userId: string, role: string, socketId: string) {
+    await this.socketSchema.deleteOne({ socketId }).catch(() => {});
     return this.socketSchema.findOneAndUpdate(
       { userId },
       { userId, role, socketId },

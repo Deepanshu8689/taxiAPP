@@ -149,7 +149,7 @@ const RiderProfile = () => {
     setSaving(true)
 
     try {
-      const res = await fetch('http://localhost:3000/driver/updatePassword', {
+      const res = await fetch('http://localhost:3000/user/updatePassword', {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json'
@@ -340,7 +340,7 @@ const RiderProfile = () => {
 
 
               <div className="form-group">
-                <label>Email</label>
+                <label>Email Id</label>
                 <input
                   type="email"
                   value={profile?.emailId}

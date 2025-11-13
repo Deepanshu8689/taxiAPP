@@ -9,6 +9,7 @@ import { LoginDTO } from "src/dto/login.dto";
 import { SignupDTO } from "src/dto/signup.dto";
 import { User, UserDocument } from "src/schema/user.schema";
 import { Ride, RideDocument } from "src/schema/ride.schema";
+import { RideStatus } from "src/enum/rideStatus.enum";
 
 @Injectable()
 export class AuthRepository {
@@ -87,8 +88,14 @@ export class AuthRepository {
                 lastName,
                 phoneNumber,
                 age,
-                role
+                role,
             })
+
+            if(role === Role.Driver){
+                user.drivingExperience = 0
+            }
+
+            await user.save();
 
             return user;
 
@@ -161,7 +168,7 @@ export class AuthRepository {
                 phoneNumber: user.phoneNumber
             }
 
-            const ride = await this.rideSchema.findOne({ driverId: user._id, status: 'accepted' })
+            const ride = await this.rideSchema.findOne({ driverId: user._id, $or: [{status: RideStatus.Accepted}, {status: RideStatus.Started}] })
 
             if (user.role === Role.Driver && ride) {
                 user.status = 'busy';
