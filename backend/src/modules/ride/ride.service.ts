@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { RideRepository } from './ride.respository';
-import { GetFareDTO, RequestRideDTO } from 'src/dto/requestRide.dto';
+import { GetFareDTO, RequestRideDTO, RequestScheduleRideDTO } from 'src/dto/requestRide.dto';
 
 @Injectable()
 export class RideService {
@@ -81,7 +81,7 @@ export class RideService {
         return await this.rideRepo.getUnpaidCompletedRide(id)
     }
 
-    async scheduleRide(user: any, dto: RequestRideDTO){
+    async scheduleRide(user: any, dto: RequestScheduleRideDTO){
         return await this.rideRepo.scheduleRide(user, dto)
     }
 }

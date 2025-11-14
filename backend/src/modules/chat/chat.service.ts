@@ -52,6 +52,15 @@ export class ChatService {
                 },
                 { new: true }
             )
+
+            if (!chat) {
+                return {
+                    success: false,
+                    message: "Ticket not found",
+                }
+            }
+
+            return chat
         } catch (error) {
             console.log("error in closeTicket: ", error)
             throw error
@@ -77,11 +86,14 @@ export class ChatService {
 
             if (!chat) {
                 return {
+                    success: false,
                     message: "Ticket not found",
                 }
             }
 
-            return chat
+            const sentMessage = chat.messages[chat.messages.length - 1]
+
+            return { chat, sentMessage }
 
         } catch (error) {
             console.log("error in sendMessage: ", error)
@@ -124,6 +136,18 @@ export class ChatService {
         }
     }
 
+    async userChats(user: any){
+        try {
+            const chats = await this.supportChatSchema.find({
+                userId: user.sub
+            })
+            return chats
+        } catch (error) {
+            console.log("error in userChats: ", error)
+            throw error
+        }
+    }
+
     async getAllChats() {
         try {
             const chats = await this.supportChatSchema.find()
@@ -140,7 +164,7 @@ export class ChatService {
     async replyToUser(user: any, chatId: string, message: string) {
         try {
 
-            const chat = this.supportChatSchema.findOneAndUpdate(
+            let chat = await this.supportChatSchema.findOneAndUpdate(
                 {
                     _id: chatId,
                     status: 'open'
@@ -159,11 +183,14 @@ export class ChatService {
 
             if (!chat) {
                 return {
+                    success: false,
                     message: "Ticket closed",
                 }
             }
 
-            return chat
+            const sentMessage = chat.messages[chat.messages.length - 1]
+
+            return { chat, sentMessage }
 
         } catch (error) {
             console.log("error in replyToUser: ", error)

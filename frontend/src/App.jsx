@@ -36,6 +36,7 @@ import DriverEarnings from "./pages/driverRoutes/DriverEarnings";
 import CompletedRide from "./pages/commonRoutes/CompletedRide";
 import AdminSupportDashboard from "./pages/adminRoutes/AdminSupportDashboard";
 import SupportChat from "./pages/commonRoutes/SupportChat";
+import ScheduleRide from "./pages/userRoutes/ScheduleRide";
 
 // Protected Route Components
 const ProtectedRoute = ({ children, allowedRoles }) => {
@@ -118,7 +119,7 @@ function App() {
             <Route path="profile" element={<RiderProfile />} />
             <Route path="history" element={<RideHistory />} />
             <Route path="support" element={<SupportChat />} />
-            {/* <Route path="complete/:rideId" element={<CompletedRide />} /> */}
+            <Route path="scheduleRide" element={<ScheduleRide />} />
           </Route>
 
 

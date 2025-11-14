@@ -5,6 +5,7 @@ import { JwtService } from '@nestjs/jwt';
 import { SocketService } from '../socket/socket.service';
 import * as cookie from 'cookie';
 // import { Server } from 'http';
+import * as schedule from 'node-schedule'
 
 
 @WebSocketGateway({
@@ -111,6 +112,49 @@ export class RideGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 
     } catch (error) {
       console.log("error in handleRequestRide: ", error)
+      throw error
+    }
+  }
+
+  @SubscribeMessage('BE-schedule-ride')
+  async scheduleRide(
+    @MessageBody() createdRide: any
+  ) {
+    try {
+
+      console.log("ride in schedule gateway: ", createdRide)
+      const rideUTC = new Date(createdRide.scheduleDate);
+
+    // convert UTC → IST
+    const rideIST = new Date(
+      rideUTC.toLocaleString("en-US", { timeZone: "Asia/Kolkata" })
+    );
+
+    // subtract 5 minutes
+    const scheduleIST = new Date(rideIST.getTime() - 1 * 60 * 1000);
+
+    // convert IST → UTC (because server uses UTC)
+    const scheduleUTC = new Date(
+      scheduleIST.toLocaleString("en-US", { timeZone: "UTC" })
+    );
+
+      const drivers = await this.rideReop.findDrivers(createdRide._id)
+      schedule.scheduleJob(scheduleUTC, async () => {
+        console.log("ride in schedule job: ", createdRide)
+        for (const driver of drivers) {
+          const socketId = await this.socketService.getSocketIdByUserId(String(driver._id))
+          if (socketId) {
+            this.io.to(socketId).emit('FE-new-ride', createdRide)
+          }
+        }
+        return {
+          message: 'Ride broadcasted to drivers',
+          ok: true
+        };
+      })
+
+    } catch (error) {
+      console.log("error in scheduleRide: ", error)
       throw error
     }
   }

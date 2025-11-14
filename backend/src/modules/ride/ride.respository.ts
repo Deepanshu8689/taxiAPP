@@ -1,7 +1,7 @@
 import { Injectable } from "@nestjs/common";
 import { InjectModel } from "@nestjs/mongoose";
 import mongoose, { Model } from "mongoose";
-import { GetFareDTO, RequestRideDTO } from "src/dto/requestRide.dto";
+import { GetFareDTO, RequestRideDTO, RequestScheduleRideDTO } from "src/dto/requestRide.dto";
 import { Ride, RideDocument } from "src/schema/ride.schema";
 import { CommonService } from "../common/common.service";
 import { Vehicle, VehicleDocument } from "src/schema/vehicle.schema";
@@ -679,9 +679,37 @@ export class RideRepository {
         }
     }
 
-    async scheduleRide(user: any, dto: RequestRideDTO){
-        return {
-            message: "Ride scheduled successfully"
+    async scheduleRide(user: any, dto: RequestScheduleRideDTO){
+        try {
+            const { pickupLocation, dropLocation, vehicleType, distance, estimatedFare, pickupLat, pickupLng, dropLat, dropLng, scheduleDate } = dto
+            const rider = await this.userSchema.findById(user.sub)
+            if(!rider.isPhoneVerified){
+                return {
+                    success: false,
+                    message: "Please verify your phone number first"
+                }
+            }
+            console.log("date: ", scheduleDate)
+            const scheduledRide = await this.rideSchema.create({
+                pickupLocation,
+                dropLocation,
+                rider: rider._id,
+                vehicleType,
+                distance,
+                estimatedFare,
+                status: RideStatus.Scheduled,
+                pickupLat,
+                pickupLng,
+                dropLat,
+                dropLng,
+                scheduleDate
+            })
+
+            return scheduledRide
+
+        } catch (error) {
+            console.log("error in bookRide: ", error)
+            throw error
         }
     }
 

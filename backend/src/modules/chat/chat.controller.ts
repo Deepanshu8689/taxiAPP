@@ -20,7 +20,6 @@ export class ChatController {
     }   
 
     @Post('/close-ticket/:ticketId')
-    @Roles(Role.Admin)
     async closeTicket(
         @User() user: any,
         @Param('ticketId') ticketId: string
@@ -53,6 +52,11 @@ export class ChatController {
         return this.chatService.initiateChat(user)
     }
 
+    @Get('/userChats')
+    async userChats(@User() user: any){
+        return this.chatService.userChats(user)
+    }
+
     @Get('/getAllChats')
     @Roles(Role.Admin)
     async getAllChats(){
@@ -68,5 +72,4 @@ export class ChatController {
     ){
         return this.chatService.replyToUser(user, chatId, message)
     }
-
 }

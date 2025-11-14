@@ -156,6 +156,16 @@
   color: #e65100;
 }
 
+.status-requested {
+  background-color: #fff3e0;
+  color: #e69600;
+}
+
+.status-scheduled {
+  background-color: #fff3e0;
+  color: #2300e6;
+}
+
 /* Ride Locations */
 .ride-locations {
   margin-bottom: 16px;

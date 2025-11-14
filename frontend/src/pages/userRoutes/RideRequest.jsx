@@ -50,7 +50,7 @@ export default function RideRequest() {
       }
 
       const data = await res.json()
-      if(!data.success) return
+      if (!data.success) return
       console.log('Fetched unpaid completed ride details:', data)
       navigate(`/rider/payment/${data._id}`)
 
@@ -169,7 +169,7 @@ export default function RideRequest() {
 
       if (!res.ok) throw new Error(data.message || "Ride request failed");
       const createdRide = await res.json()
-      if(createdRide.success === false){
+      if (createdRide.success === false) {
         alert("Please verify your phone number before booking a ride")
         return
       }
@@ -226,6 +226,7 @@ export default function RideRequest() {
       });
 
       const data = await res.json();
+      console.log("fares: ", data);
 
       if (!res.ok) throw new Error(data.message || "Ride request failed");
 
@@ -320,8 +321,15 @@ export default function RideRequest() {
             <button type="submit" className="search-btn" disabled={loading}>
               {loading ? "Searching..." : "Search Rides"}
             </button>
+            
+            <button className="search-btn" disabled={loading} onClick={() => navigate('/rider/scheduleRide')}>
+              Schedule Ride
+            </button>
+
           </form>
         </div>
+
+
 
         {/* Fare Options */}
         {fares.length > 0 && (
@@ -338,11 +346,11 @@ export default function RideRequest() {
                     <div className="fare-details">
                       <h4>{fare.vehicleType}</h4>
                       <p className="fare-eta">
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                        {/* <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                           <circle cx="12" cy="12" r="10" />
                           <polyline points="12 6 12 12 16 14" />
-                        </svg>
-                        {fare.durationMin} away
+                        </svg> */}
+                        {requestData.distance} km
                       </p>
                     </div>
                   </div>

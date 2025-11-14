@@ -58,6 +58,8 @@ const RideHistory = () => {
       case 'completed': return 'status-completed'
       case 'cancelled': return 'status-cancelled'
       case 'started': return 'status-started'
+      case 'requested': return 'status-requested'
+      case 'scheduled': return 'status-scheduled'
       default: return ''
     }
   }
@@ -124,9 +126,13 @@ const RideHistory = () => {
                 <div className="ride-header">
                   <div className="ride-date">{formatDate(ride.createdAt)}</div>
                   <span className={`ride-status ${getStatusColor(ride.status)}`}>
-                    {ride.earning !== null ? ride.status : 'Payment Pending'}
+                    {ride.earning === null ? ride.status : 'Payment Pending'}
                   </span>
                 </div>
+
+                {ride.status === 'scheduled' && <div className='ride-header'>
+                  <div className="ride-date">Scheduled for: {formatDate(ride.scheduleDate)}</div>
+                </div>}
 
                 <div className="ride-locations">
                   <div className="location-row">

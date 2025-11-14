@@ -48,6 +48,9 @@ export class Ride {
 
     @Prop({ default: null, type: Types.ObjectId, ref: 'Earning' })
     earning?: Types.ObjectId
+
+    @Prop({type: Date, default: null})
+    scheduleDate?: Date
 }
 
 export type RideDocument = Ride & Document

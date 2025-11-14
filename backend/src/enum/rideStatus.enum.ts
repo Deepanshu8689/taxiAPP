@@ -3,5 +3,6 @@ export enum RideStatus{
     Accepted = 'accepted',
     Started = 'started',
     Completed = 'completed',
-    Cancelled = 'cancelled'
+    Cancelled = 'cancelled',
+    Scheduled = 'scheduled'
 }

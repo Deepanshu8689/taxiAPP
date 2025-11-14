@@ -3,7 +3,7 @@ import { RideService } from './ride.service';
 import { AuthGuard } from 'src/common/guards/auth/auth.guard';
 import { RoleGuard } from 'src/common/guards/role/role.guard';
 import { User } from 'src/common/decorators/req-user.decorator';
-import { GetFareDTO, RequestRideDTO } from 'src/dto/requestRide.dto';
+import { GetFareDTO, RequestRideDTO, RequestScheduleRideDTO } from 'src/dto/requestRide.dto';
 import { Roles } from 'src/common/decorators/role.decorator';
 import { Role } from 'src/enum/role.enum';
 
@@ -128,7 +128,7 @@ export class RideController {
     @Roles(Role.User)
     async scheduleRide(
         @User() user: any,
-        @Body() dto: RequestRideDTO    
+        @Body() dto: RequestScheduleRideDTO    
     ){
         return await this.rideService.scheduleRide(user, dto)
     }
