@@ -182,20 +182,6 @@ const DriverHomePage = () => {
         setRequestedRides((rides) => rides.filter(ride => ride._id !== id))
     }
 
-    const logoutHandler = async () => {
-        try {
-            const res = await fetch("http://localhost:3000/auth/logout", {
-                method: "POST",
-                credentials: "include",
-            })
-
-            dispatch(removeUser())
-            navigate('/')
-        } catch (error) {
-            console.error("Error in logoutHandler:", error)
-        }
-    }
-
 
     return (
         <div className="driver-page">
@@ -221,13 +207,6 @@ const DriverHomePage = () => {
                         title="Update Location"
                     >
                         📍
-                    </button>
-                    <button
-                        className="icon-btn logout-btn"
-                        onClick={logoutHandler}
-                        title="Logout"
-                    >
-                        🚪
                     </button>
                 </div>
             </div>
@@ -299,7 +278,7 @@ const DriverHomePage = () => {
                                     </div>
                                 </div>
 
-                                {ride.status === "requested" && (
+                                {(ride.status === "requested" || ride.status === "scheduled") && (
                                     <div className="ride-actions">
                                         <button
                                             onClick={() => handleAcceptRide(ride._id)}

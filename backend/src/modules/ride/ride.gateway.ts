@@ -36,8 +36,6 @@ export class RideGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 
   async handleConnection(client: Socket) {
     try {
-
-
       const rawCookie = client.handshake.headers?.cookie || '';
       if (!rawCookie) {
         console.log("No cookie found, disconnecting...")
@@ -121,26 +119,16 @@ export class RideGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
     @MessageBody() createdRide: any
   ) {
     try {
-
-      console.log("ride in schedule gateway: ", createdRide)
+      console.log("scheduleTime: ", createdRide.scheduleDate)
       const rideUTC = new Date(createdRide.scheduleDate);
 
-    // convert UTC → IST
-    const rideIST = new Date(
-      rideUTC.toLocaleString("en-US", { timeZone: "Asia/Kolkata" })
-    );
-
-    // subtract 5 minutes
-    const scheduleIST = new Date(rideIST.getTime() - 1 * 60 * 1000);
-
-    // convert IST → UTC (because server uses UTC)
-    const scheduleUTC = new Date(
-      scheduleIST.toLocaleString("en-US", { timeZone: "UTC" })
-    );
+      // subtract 5 minutes
+      const scheduleUTC = new Date(rideUTC.getTime() - 1 * 60 * 1000);
 
       const drivers = await this.rideReop.findDrivers(createdRide._id)
       schedule.scheduleJob(scheduleUTC, async () => {
-        console.log("ride in schedule job: ", createdRide)
+        console.log("JOB FIRED at", new Date());
+
         for (const driver of drivers) {
           const socketId = await this.socketService.getSocketIdByUserId(String(driver._id))
           if (socketId) {

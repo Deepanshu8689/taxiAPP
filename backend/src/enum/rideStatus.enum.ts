@@ -4,5 +4,6 @@ export enum RideStatus{
     Started = 'started',
     Completed = 'completed',
     Cancelled = 'cancelled',
-    Scheduled = 'scheduled'
+    Scheduled = 'scheduled',
+    PaymentPending = 'paymentPending'
 }

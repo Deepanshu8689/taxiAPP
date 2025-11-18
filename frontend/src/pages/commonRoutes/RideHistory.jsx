@@ -1,14 +1,27 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useSelector } from 'react-redux'
 import { useNavigate } from 'react-router-dom'
 import '../../styles/common/rideHistory.css'
+import { createSocketConnection } from '../../utils/Socket/socket'
 
 const RideHistory = () => {
   const user = useSelector((store) => store.user)
   const navigate = useNavigate()
-  
+  const socketRef = useRef(null)
   const [rides, setRides] = useState([])
   const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    socketRef.current = createSocketConnection()
+
+    socketRef.current.on('FE-ride-accepted', (acceptedRide) => {
+      if (!acceptedRide) {
+        throw new Error('Ride not found')
+      }
+      navigate('/rider/tracking')
+    })
+
+  }, [])
 
   useEffect(() => {
     fetchRideHistory()
@@ -45,8 +58,8 @@ const RideHistory = () => {
     } else if (date.toDateString() === yesterday.toDateString()) {
       return `Yesterday, ${date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}`
     } else {
-      return date.toLocaleDateString('en-US', { 
-        month: 'short', 
+      return date.toLocaleDateString('en-US', {
+        month: 'short',
         day: 'numeric',
         year: date.getFullYear() !== today.getFullYear() ? 'numeric' : undefined
       })
@@ -117,8 +130,8 @@ const RideHistory = () => {
         ) : (
           <div className="rides-list">
             {rides.map((ride) => (
-              <div 
-                key={ride._id} 
+              <div
+                key={ride._id}
                 className="ride-history-card"
                 onClick={() => handleRideClick(ride)}
                 style={{ cursor: ride.status === 'completed' ? 'pointer' : 'default' }}
@@ -126,7 +139,7 @@ const RideHistory = () => {
                 <div className="ride-header">
                   <div className="ride-date">{formatDate(ride.createdAt)}</div>
                   <span className={`ride-status ${getStatusColor(ride.status)}`}>
-                    {ride.earning === null ? ride.status : 'Payment Pending'}
+                    {ride.status}
                   </span>
                 </div>
 
@@ -193,7 +206,7 @@ const RideHistory = () => {
                   )}
                   <div className="ride-detail fare">
                     <span className="detail-icon">₹</span>
-                    <span>{ride.actualFare? ride.actualFare :ride.estimatedFare}</span>
+                    <span>{ride.actualFare ? ride.actualFare : ride.estimatedFare}</span>
                   </div>
                 </div>
               </div>

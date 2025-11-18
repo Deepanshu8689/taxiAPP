@@ -141,7 +141,14 @@ export class RideRepository {
 
     async getAllRequestedRides() {
         try {
-            const rides = await this.rideSchema.find({ status: RideStatus.Requested })
+            const rides = await this.rideSchema.find(
+                {
+                    $or: [
+                        { status: RideStatus.Requested },
+                        { status: RideStatus.Scheduled }
+                    ]
+                }
+            )
             if (!rides) {
                 throw new Error("No requested rides found")
             }
@@ -200,7 +207,7 @@ export class RideRepository {
         try {
             const { pickupLocation, dropLocation, vehicleType, distance, estimatedFare, pickupLat, pickupLng, dropLat, dropLng } = dto
             const rider = await this.userSchema.findById(user.sub)
-            if(!rider.isPhoneVerified){
+            if (!rider.isPhoneVerified) {
                 return {
                     success: false,
                     message: "Please verify your phone number first"
@@ -237,7 +244,8 @@ export class RideRepository {
                     {
                         $or: [
                             { status: RideStatus.Accepted },
-                            { status: RideStatus.Started }
+                            { status: RideStatus.Started },
+                            { status: RideStatus.Scheduled }
                         ]
                     },
                     {
@@ -327,7 +335,7 @@ export class RideRepository {
             }
 
             const updatedRide = await this.rideSchema.findOneAndUpdate(
-                { _id: rideId, status: 'requested' },
+                { _id: rideId, $or: [{ status: RideStatus.Requested }, { status: RideStatus.Scheduled }] },
                 {
                     $set: {
                         driver: driver._id,
@@ -404,7 +412,7 @@ export class RideRepository {
             else {
                 ride.actualFare = actualFare.cost
             }
-            ride.status = RideStatus.Completed
+            ride.status = RideStatus.PaymentPending
             ride.endTime = new Date();
             await ride.save()
 
@@ -558,7 +566,7 @@ export class RideRepository {
         try {
             const ride = await this.rideSchema.findOne({
                 _id: rideId,
-                status: RideStatus.Completed
+                status: RideStatus.PaymentPending
             })
             console.log("ride: ", ride)
 
@@ -578,22 +586,38 @@ export class RideRepository {
             const existingEarning = await this.earningSchema.findOne({
                 ride: ride._id
             })
-            if (existingEarning) {
-                throw new Error("Earning already exists for this ride")
+            let earning;
+            if (!existingEarning) {
+                earning = await this.earningSchema.create({
+                    ride: ride._id,
+                    rider: ride.rider,
+                    driver: ride.driver,
+                    grossAmount: Number(grossAmount.toFixed(2)),
+                    commission: Number(commission.toFixed(2)),
+                    gstOnCommission: Number(gstOnCommission.toFixed(2)),
+                    totalCut: Number(totalCut.toFixed(2)),
+                    netAmount: Number(netAmount.toFixed(2)),
+                    paymentMethod,
+                    date: new Date()
+                })
             }
-
-            const earning = await this.earningSchema.create({
-                ride: ride._id,
-                rider: ride.rider,
-                driver: ride.driver,
-                grossAmount: Number(grossAmount.toFixed(2)),
-                commission: Number(commission.toFixed(2)),
-                gstOnCommission: Number(gstOnCommission.toFixed(2)),
-                totalCut: Number(totalCut.toFixed(2)),
-                netAmount: Number(netAmount.toFixed(2)),
-                paymentMethod,
-                date: new Date()
-            })
+            else{
+                earning = await this.earningSchema.findOneAndUpdate({
+                    _id: existingEarning._id
+                }, {
+                    $set: {
+                        grossAmount: Number(grossAmount.toFixed(2)),
+                        commission: Number(commission.toFixed(2)),
+                        gstOnCommission: Number(gstOnCommission.toFixed(2)),
+                        totalCut: Number(totalCut.toFixed(2)),
+                        netAmount: Number(netAmount.toFixed(2)),
+                        paymentMethod,
+                        date: new Date()
+                    }
+                }, {
+                    new: true
+                })
+            }
 
             if (paymentMethod === "cash") {
                 await this.walletService.deductMoneyFromCash(String(ride.driver), grossAmount, totalCut)
@@ -606,7 +630,8 @@ export class RideRepository {
                 _id: rideId
             }, {
                 $set: {
-                    earning: earning._id
+                    earning: existingEarning ? existingEarning._id : earning._id,
+                    status: RideStatus.Completed
                 }
             })
 
@@ -669,7 +694,7 @@ export class RideRepository {
                 path: 'vehicle',
                 model: Vehicle.name,
                 // select: 'vehicleName vehicleNumber vehicleType vehicleColor vehicleImage',
-            })
+            }).sort({ createdAt: -1 })
 
             return rides
 
@@ -679,11 +704,11 @@ export class RideRepository {
         }
     }
 
-    async scheduleRide(user: any, dto: RequestScheduleRideDTO){
+    async scheduleRide(user: any, dto: RequestScheduleRideDTO) {
         try {
             const { pickupLocation, dropLocation, vehicleType, distance, estimatedFare, pickupLat, pickupLng, dropLat, dropLng, scheduleDate } = dto
             const rider = await this.userSchema.findById(user.sub)
-            if(!rider.isPhoneVerified){
+            if (!rider.isPhoneVerified) {
                 return {
                     success: false,
                     message: "Please verify your phone number first"

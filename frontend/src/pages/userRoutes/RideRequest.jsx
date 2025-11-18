@@ -125,23 +125,6 @@ export default function RideRequest() {
     }
   }
 
-  const logoutHandler = async (e) => {
-    e.preventDefault();
-    try {
-
-      const res = await fetch("http://localhost:3000/auth/logout", {
-        method: "Post",
-        credentials: "include",
-      })
-
-      dispatch(removeUser())
-      navigate('/')
-
-    } catch (error) {
-      console.log("error in logoutHandler: ", error)
-      throw error
-    }
-  }
 
   const bookRideHandler = async (fare) => {
 
@@ -273,13 +256,7 @@ export default function RideRequest() {
           >
             📍
           </button>
-          <button
-            className="icon-btn logout-btn"
-            onClick={logoutHandler}
-            title="Logout"
-          >
-            🚪
-          </button>
+          
         </div>
       </div>
 

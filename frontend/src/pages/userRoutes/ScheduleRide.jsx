@@ -19,8 +19,7 @@ export default function ScheduleRide() {
     const [requestData, setRequestData] = useState({});
     const [loading, setLoading] = useState(false);
     const [locationLoading, setLocationLoading] = useState(false)
-    const [pickupTime, setPickupTime] = useState(Date)
-    console.log("pickupTime: ", new Date(pickupTime).toISOString())
+    const [pickupTime, setPickupTime] = useState("")
 
 
     useEffect(() => {
@@ -158,8 +157,10 @@ export default function ScheduleRide() {
                 pickupLng: requestData.pickUpCoords.longitude,
                 dropLat: requestData.dropCoords.latitude,
                 dropLng: requestData.dropCoords.longitude,
-                scheduleDate: new Date(pickupTime).toISOString()
+                scheduleDate: pickupTime
             }
+
+            console.log("pickupTime: ", pickupTime)
 
 
             const res = await fetch("http://localhost:3000/ride/scheduleRide", {
