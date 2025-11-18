@@ -11,8 +11,7 @@ const DriverProfile = () => {
   const [loading, setLoading] = useState(true)
   const [editing, setEditing] = useState(null) // 'personal', 'vehicle', 'bank', 'password'
   const [saving, setSaving] = useState(false)
-  const [showVerifyInput, setShowVerifyInput] = useState(false);
-  const [vehicle, setVehicle] = useState(null)
+  const [showVerifyInput, setShowVerifyInput] = useState(false)
 
   const [formData, setFormData] = useState({
     // Personal
@@ -45,21 +44,10 @@ const DriverProfile = () => {
 
   useEffect(() => {
     fetchProfile()
-    fetchVehicle()
+    // fetchVehicle()
   }, [])
 
-  const fetchVehicle = async () => {
-    try {
-      const res = await fetch(`http://localhost:3000/driver/getVehicle/${user.vehicle}`, {
-        credentials: 'include'
-      })
-      if (!res.ok) throw new Error('Failed to fetch vehicle')
-      const data = await res.json()
-      setVehicle(data)
-    } catch (error) {
-      console.error('Error fetching vehicle:', error)
-    }
-  }
+  
 
   const fetchProfile = async () => {
     try {
@@ -71,6 +59,7 @@ const DriverProfile = () => {
       if (!res.ok) throw new Error('Failed to fetch profile')
 
       const data = await res.json()
+      console.log('Fetched profile:', data)
       setProfile(data)
 
       // Initialize form data
@@ -491,16 +480,16 @@ const DriverProfile = () => {
                 </div>
               </div>
 
-                <div className="form-group">
-                  <label>Phone Number</label>
-                  <input
-                    type="tel"
-                    name="phoneNumber"
-                    value={formData.phoneNumber}
-                    onChange={handleInputChange}
-                    required
-                  />
-                </div>
+              <div className="form-group">
+                <label>Phone Number</label>
+                <input
+                  type="tel"
+                  name="phoneNumber"
+                  value={formData.phoneNumber}
+                  onChange={handleInputChange}
+                  required
+                />
+              </div>
               <div className='form-row'>
 
                 <div className="form-group">
@@ -685,23 +674,23 @@ const DriverProfile = () => {
             )}
 
           </div>
-          {(user.vehicle && vehicle) && <div className='section-header'>
-            {vehicle.isVehicleVerified ? (
-            <span className="verified-badge">✅ Verified</span>
-          ) : (
-              <>
-            {
-              vehicle?.vehicleNumber ? (
-                <span className="verified-badge">Complete Vehicle Details</span>
+          {
+            (profile?.vehicle) && <div className='section-header'>
+              {profile?.vehicle.isVehicleVerified ? (
+                <span className="verified-badge">✅ Verified</span>
               ) : (
-                <span className="verified-badge">Verification Pending</span>
-              ) 
-            }
-            </>
-              
-            
-          )}
-          </div>}
+                <>
+                  {
+                    profile?.vehicle?.vehicleNumber ? (
+                      <span className="verified-badge">Verification Pending</span>
+                    ) : (
+                      <span className="verified-badge">Complete Vehicle Details</span>
+                    )
+                  }
+                </>
+              )}
+            </div>
+          }
 
           {editing === 'vehicle' ? (
             <form onSubmit={handleVehicleSubmit} className="edit-form">

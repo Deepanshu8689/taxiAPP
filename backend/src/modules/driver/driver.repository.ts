@@ -32,12 +32,12 @@ export class DriverRepository {
 
     async getProfile(user: any) {
 
-        const profile = await this.userSchema.findById(user.sub).populate('vehicle')
-        console.log("profile: ", profile)
-        if (!profile) {
+        const driver = await this.userSchema.findById(user.sub).populate('vehicle')
+        console.log("driver profile: ", driver)
+        if (!driver) {
             throw new NotFoundException("Driver not found")
         }
-        return profile
+        return driver
     }
 
     async updateVehicleDetails(user: any, dto: VehicleDTO) {
