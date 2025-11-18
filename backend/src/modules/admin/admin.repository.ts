@@ -51,7 +51,7 @@ export class AdminRepository {
         try {
 
             const driver = await this.userSchema.findById(id);
-            if (!driver.drivingExperience || driver.drivingExperience < 2 || !driver.drivingLicence) {
+            if (driver.drivingExperience < 2 && !driver.drivingLicence) {
                 throw new BadRequestException("Please verify driver first")
             }
 
@@ -237,7 +237,7 @@ export class AdminRepository {
             }).populate({
                 path: 'vehicle',
                 model: Vehicle.name
-            })
+            }).sort({ createdAt: -1 })
             return rides
         } catch (error) {
             console.log("error in getAllRides: ", error)

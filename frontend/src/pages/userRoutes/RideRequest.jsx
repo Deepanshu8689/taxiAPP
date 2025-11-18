@@ -1,5 +1,5 @@
 import { useContext, useEffect, useRef, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { data, useNavigate } from "react-router-dom";
 import "../../styles/user/rideRequest.css";
 import { useDispatch, useSelector } from "react-redux";
 import { removeUser } from "../../utils/Redux/userSlice";
@@ -81,11 +81,13 @@ export default function RideRequest() {
         navigate('/rider/active-ride')
       }
 
+      
     } catch (error) {
       console.error("Error in currentRide:", error)
       return null
     }
   }
+
 
   const locationHandler = async (e) => {
     e.preventDefault()

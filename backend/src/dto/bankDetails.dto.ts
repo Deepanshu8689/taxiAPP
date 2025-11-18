@@ -5,9 +5,11 @@ import { IsNotEmpty, IsNumber, IsOptional, IsString } from "class-validator";
 export class BankDetailsDTO{
 
     @IsString()
+    @IsOptional()
     accountNumber?: string
 
     @IsString()
+    @IsOptional()
     IFSCcode?: string
     
     @IsOptional()

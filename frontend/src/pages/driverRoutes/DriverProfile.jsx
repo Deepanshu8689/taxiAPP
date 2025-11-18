@@ -11,6 +11,8 @@ const DriverProfile = () => {
   const [loading, setLoading] = useState(true)
   const [editing, setEditing] = useState(null) // 'personal', 'vehicle', 'bank', 'password'
   const [saving, setSaving] = useState(false)
+  const [showVerifyInput, setShowVerifyInput] = useState(false);
+  const [vehicle, setVehicle] = useState(null)
 
   const [formData, setFormData] = useState({
     // Personal
@@ -34,6 +36,7 @@ const DriverProfile = () => {
     accountNumber: '',
     IFSCcode: '',
     type: '',
+    vpaAddress: '',
     // Password
     password: '',
     newPassword: '',
@@ -42,7 +45,21 @@ const DriverProfile = () => {
 
   useEffect(() => {
     fetchProfile()
+    fetchVehicle()
   }, [])
+
+  const fetchVehicle = async () => {
+    try {
+      const res = await fetch(`http://localhost:3000/driver/getVehicle/${user.vehicle}`, {
+        credentials: 'include'
+      })
+      if (!res.ok) throw new Error('Failed to fetch vehicle')
+      const data = await res.json()
+      setVehicle(data)
+    } catch (error) {
+      console.error('Error fetching vehicle:', error)
+    }
+  }
 
   const fetchProfile = async () => {
     try {
@@ -55,7 +72,6 @@ const DriverProfile = () => {
 
       const data = await res.json()
       setProfile(data)
-      console.log('Fetched profile:', data)
 
       // Initialize form data
       setFormData({
@@ -212,17 +228,25 @@ const DriverProfile = () => {
     setSaving(true)
 
     try {
+
+      const listedKeys = ['type', 'accountNumber', 'IFSCcode', 'vpaAddress']
+
+      const payload = {};
+      for (const key in formData) {
+        if (formData[key] !== '' && formData[key] !== user[key]) {
+          if (listedKeys.includes(key)) {
+            payload[key] = formData[key];
+          }
+          // payload[key] = formData[key];
+        }
+      }
       const res = await fetch('http://localhost:3000/driver/updateBankDetails', {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json'
         },
         credentials: 'include',
-        body: JSON.stringify({
-          type: formData.type,
-          accountNumber: formData.accountNumber,
-          IFSCcode: formData.IFSCcode,
-        })
+        body: JSON.stringify(payload)
       })
 
       if (!res.ok) throw new Error('Update failed')
@@ -654,20 +678,20 @@ const DriverProfile = () => {
         <div className="profile-section">
           <div className="section-header">
             <h3>Vehicle Information</h3>
-            {editing !== 'vehicle' && (
+            {(editing !== 'vehicle' && user.isEmailVerified && user.isPhoneVerified) && (
               <button className="edit-icon-btn" onClick={() => setEditing('vehicle')}>
                 ✏️
               </button>
             )}
 
           </div>
-          {user.vehicle && <div className='section-header'>
-            {user?.vehicle.isVehicleVerified ? (
+          {(user.vehicle && vehicle) && <div className='section-header'>
+            {vehicle.isVehicleVerified ? (
             <span className="verified-badge">✅ Verified</span>
           ) : (
               <>
             {
-              user?.vehicle?.vehicleNumber ? (
+              vehicle?.vehicleNumber ? (
                 <span className="verified-badge">Complete Vehicle Details</span>
               ) : (
                 <span className="verified-badge">Verification Pending</span>
@@ -838,7 +862,7 @@ const DriverProfile = () => {
         <div className="profile-section">
           <div className="section-header">
             <h3>Bank Details</h3>
-            {editing !== 'bank' && (
+            {(editing !== 'bank' && user.isEmailVerified && user.isPhoneVerified) && (
               <button className="edit-icon-btn" onClick={() => setEditing('bank')}>
                 ✏️
               </button>

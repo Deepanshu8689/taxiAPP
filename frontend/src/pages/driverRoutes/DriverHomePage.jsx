@@ -12,12 +12,14 @@ const DriverHomePage = () => {
     const socketRef = useRef(null)
     const navigate = useNavigate()
     const [requestedRides, setRequestedRides] = useState([])
-    const [loading, setLoading] = useState(true)
+    const [loading, setLoading] = useState(false)
     const [locationLoading, setLocationLoading] = useState(false)
     const [acceptingRide, setAcceptingRide] = useState(null)
 
     useEffect(() => {
-        fetchRequestedRides()
+        if(user.isVerified) {
+            fetchRequestedRides()
+        }
         currentRide()
     }, [])
 

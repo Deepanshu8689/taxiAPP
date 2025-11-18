@@ -32,8 +32,8 @@ export class DriverRepository {
 
     async getProfile(user: any) {
 
-        const profile = await this.userSchema.findById(user.sub)
-        .populate('vehicle')
+        const profile = await this.userSchema.findById(user.sub).populate('vehicle')
+        console.log("profile: ", profile)
         if (!profile) {
             throw new NotFoundException("Driver not found")
         }
@@ -228,6 +228,7 @@ export class DriverRepository {
         try {
 
             const driver = await this.userSchema.findById(user.sub);
+            console.log("driver: ", driver)
 
             let contactId = driver.razorpayContactId;
             if (!contactId) {
@@ -251,6 +252,16 @@ export class DriverRepository {
             throw error
         }
 
+    }
+
+    async getVehicle(id: string) {
+        try {
+            const vehicle = await this.vehicleSchema.findById(id)
+            return vehicle
+        } catch (error) {
+            console.log("error in getVehicle: ", error)
+            throw error
+        }
     }
 
 }

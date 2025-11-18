@@ -140,7 +140,7 @@ export class ChatService {
         try {
             const chats = await this.supportChatSchema.find({
                 userId: user.sub
-            })
+            }).sort({ createdAt: -1 })
             return chats
         } catch (error) {
             console.log("error in userChats: ", error)

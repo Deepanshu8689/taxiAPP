@@ -12,9 +12,7 @@ const SupportChat = () => {
   const socketRef = useRef(null);
   const messagesEndRef = useRef(null);
 
-  // -----------------------------
-  // INIT SOCKET + FETCH CHATS
-  // -----------------------------
+
   useEffect(() => {
     const socket = createSocketConnection();
     socketRef.current = socket;
@@ -30,9 +28,7 @@ const SupportChat = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
-  // -----------------------------
-  // FETCH ALL USER CHATS
-  // -----------------------------
+  
   const fetchUserChats = async () => {
     setLoading(true);
     try {
@@ -48,9 +44,7 @@ const SupportChat = () => {
     setLoading(false);
   };
 
-  // -----------------------------
-  // SELECT CHAT
-  // -----------------------------
+
   const openChat = async (chat) => {
     setSelectedChat(chat);
     setLoading(true);
@@ -69,9 +63,7 @@ const SupportChat = () => {
     setLoading(false);
   };
 
-  // -----------------------------
-  // CREATE NEW TICKET
-  // -----------------------------
+  
   const generateTicket = async () => {
     if (sending) return;
     setSending(true);
@@ -102,9 +94,7 @@ const SupportChat = () => {
     setSending(false);
   };
 
-  // -----------------------------
-  // SEND MESSAGE
-  // -----------------------------
+  
   const sendMessage = async () => {
     if (!newMessage.trim() || sending || !selectedChat) return;
 

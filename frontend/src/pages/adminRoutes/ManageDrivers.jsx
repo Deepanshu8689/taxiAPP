@@ -40,7 +40,7 @@ const ManageDrivers = () => {
         method: 'PATCH',
         credentials: 'include'
       })
-
+      
       if (res.ok) {
         alert('Driver verified successfully!')
         fetchDrivers()

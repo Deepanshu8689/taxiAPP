@@ -39,4 +39,8 @@ export class DriverService {
         return this.driverRepo.updateBankDetails(dto, user)
     }
 
+    async getVehicle(id: string) {
+        return this.driverRepo.getVehicle(id)
+    }
+
 }

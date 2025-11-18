@@ -18,6 +18,7 @@ import { SocketModule } from './modules/socket/socket.module';
 import { CloudinaryModule } from './modules/cloudinary/cloudinary.module';
 import { v2 as cloudinary } from 'cloudinary';
 import { ChatModule } from './modules/chat/chat.module';
+import { NotificationModule } from './modules/notification/notification.module';
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -50,6 +51,7 @@ import { ChatModule } from './modules/chat/chat.module';
     SocketModule,
     CloudinaryModule,
     ChatModule,
+    NotificationModule,
   ],
   controllers: [AppController, NotificationController],
   providers: [AppService, CommonService],

@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Patch, Post, UploadedFiles, UseGuards, UseInterceptors } from '@nestjs/common';
+import { Body, Controller, Get, Param, Patch, Post, UploadedFiles, UseGuards, UseInterceptors } from '@nestjs/common';
 import { FilesInterceptor } from '@nestjs/platform-express';
 import { User } from 'src/common/decorators/req-user.decorator';
 import { Roles } from 'src/common/decorators/role.decorator';
@@ -102,6 +102,11 @@ export class DriverController {
         }
         console.log("dto: ", dto)
         return this.driverService.updateProfile(user, dto)
+    }
+
+    @Get('/getVehicle/:id')
+    async getVehicle(@Param('id') id: string){
+        return await this.driverService.getVehicle(id)
     }
 
     @Patch('/updateStatus')
