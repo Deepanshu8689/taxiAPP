@@ -16,6 +16,44 @@ export default function Login() {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState("");
 
+    const locationHandler = async () => {
+        try {
+            if (!navigator.geolocation) {
+                alert("Geolocation is not supported by this browser.")
+                return
+            }
+
+            navigator.geolocation.getCurrentPosition(
+                async (pos) => {
+                    const { latitude, longitude } = pos.coords
+
+                    const res = await fetch(
+                        `http://localhost:3000/driver/updateCurrentLocation`,
+                        {
+                            method: "PATCH",
+                            headers: {
+                                "Content-Type": "application/json"
+                            },
+                            credentials: "include",
+                            body: JSON.stringify({ latitude, longitude })
+                        }
+                    )
+
+                    if (res.ok) {
+                        alert("Location updated successfully!")
+                    }
+                },
+                (error) => {
+                    console.error("Geolocation error:", error)
+                    alert("Failed to get location. Please enable location services.")
+                }
+            )
+        } catch (error) {
+            console.error("Error in locationHandler:", error)
+            alert("Failed to update location")
+        } 
+    }
+
     const handleSubmit = async (e) => {
         e.preventDefault();
         setError("");
@@ -46,6 +84,7 @@ export default function Login() {
             dispatch(addUser(data.user))
 
             if(data.user.role === 'driver'){
+                locationHandler()
                 navigate('/driver/home')
             }
             else if(data.user.role === 'user'){

@@ -1,5 +1,7 @@
 /* Driver Profile Page */
 .driver-profile-page {
+
+  width: calc(100vh - 100px);
   min-height: calc(100vh - 140px);
   background-color: #f5f5f5;
   padding: 20px;

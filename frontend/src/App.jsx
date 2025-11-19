@@ -37,6 +37,8 @@ import CompletedRide from "./pages/commonRoutes/CompletedRide";
 import AdminSupportDashboard from "./pages/adminRoutes/AdminSupportDashboard";
 import SupportChat from "./pages/commonRoutes/SupportChat";
 import ScheduleRide from "./pages/userRoutes/ScheduleRide";
+import MapWithRoute from "./pages/commonRoutes/MapWithRoute";
+import MapTracking from "./pages/userRoutes/MapTracking";
 
 // Protected Route Components
 const ProtectedRoute = ({ children, allowedRoles }) => {
@@ -120,6 +122,7 @@ function App() {
             <Route path="history" element={<RideHistory />} />
             <Route path="support" element={<SupportChat />} />
             <Route path="scheduleRide" element={<ScheduleRide />} />
+            <Route path="track-ride/:pickupLat/:pickupLng/:dropLat/:dropLng" element={<MapWithRoute/>}/>
           </Route>
 
 

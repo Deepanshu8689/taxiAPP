@@ -66,7 +66,7 @@ const ManageRides = () => {
         </div>
 
         <div className="filter-tabs">
-          {['all', 'completed', 'started', 'accepted', 'requested', 'cancelled'].map((status) => (
+          {['all', 'completed', 'started','scheduled', 'accepted', 'requested', 'cancelled'].map((status) => (
             <button
               key={status}
               className={`filter-tab ${filter === status ? 'active' : ''}`}

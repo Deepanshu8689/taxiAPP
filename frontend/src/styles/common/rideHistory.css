@@ -1,6 +1,8 @@
 /* History Page */
 .history-page {
   min-height: calc(100vh - 140px);
+
+  width: calc(100vh - 100px);
   background-color: #f5f5f5;
   padding: 20px;
 }

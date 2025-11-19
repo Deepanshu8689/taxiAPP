@@ -571,7 +571,8 @@ export class RideRepository {
             console.log("ride: ", ride)
 
             if (!ride) {
-                throw new Error("Ride not found")
+                console.log("Ride not found")
+                return
             }
 
             const commission_rate = this.configService.get<number>('COMMISSION_RATE');

@@ -5,6 +5,7 @@ const cookieParser = require('cookie-parser')
 import * as dotenv from 'dotenv';
 import * as express from 'express';
 import { join } from 'path';
+import { AllExceptionsFilter } from './common/filters/all-exception.filter';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -12,6 +13,8 @@ async function bootstrap() {
   app.use('/payment/webhook', express.raw({type: 'application/json'}))
   // console.log("port: ", process.env.PORT)
   app.use(cookieParser())
+  app.useGlobalFilters(new AllExceptionsFilter());
+
   app.useGlobalPipes(new ValidationPipe({
     whitelist: true,
     transform: true,

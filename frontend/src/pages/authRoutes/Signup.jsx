@@ -6,7 +6,6 @@ import "../../styles/auth/signup.css";
 
 export default function Signup() {
     const navigate = useNavigate();
-    const dispatch = useDispatch();
     
     const [userType, setUserType] = useState("user"); // 'user' or 'driver'
     const [loading, setLoading] = useState(false);

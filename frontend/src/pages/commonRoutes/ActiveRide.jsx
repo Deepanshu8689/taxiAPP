@@ -130,6 +130,7 @@ const ActiveRide = () => {
       <div className="trip-info-card">
         <h2>Trip Details</h2>
         
+        
         <div className="trip-locations">
           <div className="location-item">
             <div className="location-icon pickup">
@@ -172,6 +173,10 @@ const ActiveRide = () => {
             <span className="detail-value">{ride.vehicleType}</span>
           </div>
         </div>
+
+        <button onClick={() => {navigate(`/rider/track-ride/${ride.pickupLat}/${ride.pickupLng}/${ride.dropLat}/${ride.dropLng}`)}}>
+          Track Ride
+        </button>
       </div>
 
       {user.role === 'driver' ? (

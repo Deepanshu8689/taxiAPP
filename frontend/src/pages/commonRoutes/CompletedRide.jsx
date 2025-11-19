@@ -24,13 +24,15 @@ const CompletedRide = () => {
       if (!res.ok) {
         throw new Error('Payment processing failed')
       }
-
+      
       await res.json()
       alert('Payment processed successfully!')
+      console.log("res: ", res)
       navigate('/driver/home')
 
     } catch (error) {
-
+      console.error('Error processing payment:', error)
+      alert('Payment processing failed. Please try again.')
     }
   }
 

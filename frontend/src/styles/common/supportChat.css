@@ -2,6 +2,7 @@
 .sc-container {
   display: flex;
   height: 100vh;
+    width: calc(100vh - 10px);
   max-width: 600px;
   margin: 0 auto;
   background: #f4f6f9;
@@ -10,7 +11,7 @@
 
 /* LEFT SIDEBAR */
 .sc-sidebar {
-  width: 28%;
+    width: calc(100vh - 470px);
   background: white;
   border-right: 1px solid #ddd;
   display: flex;
