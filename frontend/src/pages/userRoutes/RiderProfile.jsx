@@ -10,7 +10,7 @@ const RiderProfile = () => {
 
   const [isEditing, setIsEditing] = useState(false)
   const [error, setError] = useState('')
-  const [selectedFile, setSelectedFile] = useState(null)
+  const [ratings, setRatings] = useState(0)
   const [showVerifyInput, setShowVerifyInput] = useState(false);
   const [otp, setOtp] = useState("");
   const [verifying, setVerifying] = useState(false)
@@ -34,7 +34,26 @@ const RiderProfile = () => {
 
   useEffect(() => {
     fetchProfile()
+    fetchRatings()
   }, [])
+
+  const fetchRatings = async () => {
+    try {
+      const res = await fetch('http://localhost:3000/user/getRatings', {
+        credentials: 'include'
+      })
+      if (!res.ok) throw new Error('Failed to fetch ratings')
+      const data = await res.json()
+
+      console.log('Fetched ratings:', data)
+      if(data.averageRating){
+        setRatings(data.averageRating)
+      }
+    } catch (error) {
+      console.error('Error fetching ratings:', error)
+      throw error
+    }
+  }  
 
   const fetchProfile = async () => {
     try {
@@ -133,43 +152,6 @@ const RiderProfile = () => {
     } catch (error) {
       console.error('Update error:', error)
       alert('Failed to update profile')
-    } finally {
-      setSaving(false)
-    }
-  }
-
-  const handlePasswordSubmit = async (e) => {
-    e.preventDefault()
-
-    if (formData.newPassword !== formData.confirmNewPassword) {
-      alert('New passwords do not match')
-      return
-    }
-
-    setSaving(true)
-
-    try {
-      const res = await fetch('http://localhost:3000/user/updatePassword', {
-        method: 'PATCH',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        credentials: 'include',
-        body: JSON.stringify({
-          password: formData.password,
-          newPassword: formData.newPassword,
-          confirmNewPassword: formData.confirmNewPassword
-        })
-      })
-
-      if (!res.ok) throw new Error('Password update failed')
-
-      setEditing(null)
-      setFormData({ ...formData, password: '', newPassword: '', confirmNewPassword: '' })
-      alert('Password updated successfully!')
-    } catch (error) {
-      console.error('Password update error:', error)
-      alert('Failed to update password')
     } finally {
       setSaving(false)
     }
@@ -384,106 +366,11 @@ const RiderProfile = () => {
               <div className="info-item">
                 <span className="info-label">Phone Number</span>
                 <span className="info-value">{profile?.phoneNumber}</span>
-                {user?.isPhoneVerified ? (
-                  <span className="verified-badge">✅ Verified</span>
-                ) : (
-                  <div className="verify-container">
-                    {(!showVerifyInput && !user?.isPhoneVerified) ? (
-                      <button className="verify-btn" onClick={sendOtpHandler}>
-                        Verify
-                      </button>
-                    ) : (
-                      <div className="verify-input-wrapper">
-                        <input
-                          type="text"
-                          placeholder="Enter OTP"
-                          className="verify-input"
-                          value={otp}
-                          onChange={(e) => setOtp(e.target.value)}
-                        />
-                        <button
-                          className="verify-submit-btn"
-                          onClick={handleVerifyOtp}
-                          disabled={verifying}
-                        >
-                          {verifying ? "Verifying..." : "Submit"}
-                        </button>
-                        <button
-                          className="verify-cancel-btn"
-                          onClick={() => {
-                            setShowVerifyInput(false);
-                            setOtp("");
-                          }}
-                        >
-                          ✕
-                        </button>
-                      </div>
-                    )}
-                  </div>
-                )}
               </div>
 
             </div>
           )}
 
-        </div>
-
-        {/* password change */}
-        <div className="profile-section">
-          <div className="section-header">
-            <h3>Change Password</h3>
-            {editing !== 'password' && (
-              <button className="edit-icon-btn" onClick={() => setEditing('password')}>
-                ✏️
-              </button>
-            )}
-          </div>
-
-          {editing === 'password' && (
-            <form onSubmit={handlePasswordSubmit} className="edit-form">
-              <div className="form-group">
-                <label>Current Password</label>
-                <input
-                  type="password"
-                  name="password"
-                  value={formData.password}
-                  onChange={handleInputChange}
-                  required
-                />
-              </div>
-
-              <div className="form-group">
-                <label>New Password</label>
-                <input
-                  type="password"
-                  name="newPassword"
-                  value={formData.newPassword}
-                  onChange={handleInputChange}
-                  required
-                />
-              </div>
-
-              <div className="form-group">
-                <label>Confirm New Password</label>
-                <input
-                  type="password"
-                  name="confirmNewPassword"
-                  value={formData.confirmNewPassword}
-                  onChange={handleInputChange}
-                  required
-                />
-              </div>
-
-              <div className="form-actions">
-                <button type="button" className="cancel-btn" onClick={cancelEdit}>
-                  Cancel
-                </button>
-                <button type="submit" className="save-btn" disabled={saving}>
-                  {saving ? 'Updating...' : 'Update Password'}
-                </button>
-              </div>
-            </form>
-          )}
         </div>
 
         {/* Account Stats */}
@@ -498,7 +385,7 @@ const RiderProfile = () => {
           <div className="stat-card">
             <div className="stat-icon">⭐</div>
             <div className="stat-info">
-              <span className="stat-value">4.8</span>
+              <span className="stat-value">{ratings.toFixed(1) || '0.0'}</span>
               <span className="stat-label">Rating</span>
             </div>
           </div>

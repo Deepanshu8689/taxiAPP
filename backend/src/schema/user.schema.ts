@@ -10,11 +10,8 @@ export class User {
     @Prop({ unique: true })
     emailId: string
 
-    @Prop({ required: true }) // , unique: true
+    @Prop({ required: true, unique: true }) // , unique: true
     phoneNumber: string
-
-    @Prop({ required: true })
-    password: string
 
     @Prop({ required: true })
     firstName: string
@@ -67,9 +64,6 @@ export class User {
 
     @Prop({ default: false })
     isEmailVerified: boolean
-
-    @Prop({ default: false })
-    isPhoneVerified: boolean
 
     @Prop({ type: Number, default: 0 })
     totalEarnings: number; // driver lifetime net take-home

@@ -142,6 +142,15 @@
   font-weight: 600;
   text-transform: capitalize;
 }
+.ride-rating {
+  background-color: #dc86df;
+  
+  padding: 4px 12px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: capitalize;
+}
 
 .status-completed {
   background-color: #e8f5e9;
@@ -227,6 +236,7 @@
 .ride-person {
   display: flex;
   align-items: center;
+  justify-content: space-between;
   gap: 12px;
   padding: 12px;
   background-color: #f8f8f8;
@@ -252,6 +262,7 @@
   display: flex;
   flex-direction: column;
   gap: 2px;
+  margin-right: auto;
 }
 
 .person-name {

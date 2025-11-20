@@ -38,8 +38,7 @@ import AdminSupportDashboard from "./pages/adminRoutes/AdminSupportDashboard";
 import SupportChat from "./pages/commonRoutes/SupportChat";
 import ScheduleRide from "./pages/userRoutes/ScheduleRide";
 import MapWithRoute from "./pages/commonRoutes/MapWithRoute";
-import MapTracking from "./pages/userRoutes/MapTracking";
-
+import RatingAndReview from "./pages/commonRoutes/RatingAndReview";
 // Protected Route Components
 const ProtectedRoute = ({ children, allowedRoles }) => {
   const user = useSelector((store) => store.user);
@@ -70,6 +69,24 @@ const PublicRoute = ({ children }) => {
 
   return children;
 };
+
+// NEW: Driver Verification Route Protection
+const DriverVerificationRoute = ({ children }) => {
+  const user = useSelector((store) => store.user);
+  console.log("user: ", user)
+
+  // If driver is not verified, redirect to profile page
+  if (user?.role === 'driver' && user?.isVerified === false) {
+    // Allow access only to profile page
+    const currentPath = window.location.pathname;
+    if (currentPath !== '/driver/profile') {
+      return <Navigate to="/driver/profile" replace />;
+    }
+  }
+  return children;
+};
+
+
 
 function App() {
   return (
@@ -118,15 +135,16 @@ function App() {
             <Route path="active-ride" element={<ActiveRide />} />
             <Route path="ride-complete/:rideId" element={<RideComplete />} />
             <Route path="payment/:rideId" element={<RidePayment />} />
+            <Route path="rate/:rideId" element={<RatingAndReview />} />
             <Route path="profile" element={<RiderProfile />} />
             <Route path="history" element={<RideHistory />} />
             <Route path="support" element={<SupportChat />} />
             <Route path="scheduleRide" element={<ScheduleRide />} />
-            <Route path="track-ride/:pickupLat/:pickupLng/:dropLat/:dropLng" element={<MapWithRoute/>}/>
+            <Route path="track-ride/:pickupLat/:pickupLng/:dropLat/:dropLng" element={<MapWithRoute />} />
           </Route>
 
 
-          {/* Driver Routes */}
+          {/* Driver Routes - WITH VERIFICATION PROTECTION */}
           <Route
             path="/driver"
             element={
@@ -135,22 +153,55 @@ function App() {
               </ProtectedRoute>
             }
           >
-
             <Route index element={<Navigate to="/driver/home" replace />} />
-            <Route path="home" element={<DriverHomePage />} />
-            <Route path="dashboard" element={<DriverDashboard />} />
-            <Route path="active-ride" element={<ActiveRide />} />
+
+            {/* Profile page - Always accessible for drivers */}
             <Route path="profile" element={<DriverProfile />} />
-            <Route path="earnings" element={<DriverEarnings />} />
-            <Route path="completed/:rideId" element={<CompletedRide />} />
-            <Route path="history" element={<RideHistory />} />
-            <Route path="support" element={<SupportChat />} />
 
-
+            {/* All other routes require verification */}
+            <Route path="home" element={
+              <DriverVerificationRoute>
+                <DriverHomePage />
+              </DriverVerificationRoute>
+            } />
+            <Route path="rate/:rideId" element={
+              <DriverVerificationRoute>
+                <RatingAndReview />
+              </DriverVerificationRoute>
+            } />
+            <Route path="dashboard" element={
+              <DriverVerificationRoute>
+                <DriverDashboard />
+              </DriverVerificationRoute>
+            } />
+            <Route path="active-ride" element={
+              <DriverVerificationRoute>
+                <ActiveRide />
+              </DriverVerificationRoute>
+            } />
+            <Route path="earnings" element={
+              <DriverVerificationRoute>
+                <DriverEarnings />
+              </DriverVerificationRoute>
+            } />
+            <Route path="completed/:rideId" element={
+              <DriverVerificationRoute>
+                <CompletedRide />
+              </DriverVerificationRoute>
+            } />
+            <Route path="history" element={
+              <DriverVerificationRoute>
+                <RideHistory />
+              </DriverVerificationRoute>
+            } />
+            <Route path="support" element={
+              <DriverVerificationRoute>
+                <SupportChat />
+              </DriverVerificationRoute>
+            } />
           </Route>
 
           {/* Admin Routes */}
-
           <Route
             path="/admin"
             element={
@@ -167,8 +218,6 @@ function App() {
             <Route path="analytics" element={<Analytics />} />
             <Route path="support-dashboard" element={<AdminSupportDashboard />} />
           </Route>
-
-
         </Routes>
       </Provider>
     </>

@@ -8,7 +8,7 @@ import { LoginDTO } from 'src/dto/login.dto';
 import { Response } from 'express';
 import { AuthGuard } from 'src/common/guards/auth/auth.guard';
 import { User } from 'src/common/decorators/req-user.decorator';
-import { SignupDTO } from 'src/dto/signup.dto';
+import { AdminSignupDTO, SignupDTO } from 'src/dto/signup.dto';
 
 @Controller('auth')
 export class AuthController {
@@ -16,6 +16,17 @@ export class AuthController {
         private readonly authService: AuthService,
         private otpService: OtpSmsService
     ) { }
+
+    @Post('/send-otp')
+    async sendOtpSms(@Body() body: any) {
+        console.log("body: ", body)
+        return await this.otpService.sendOtpSms(body.phoneNumber);
+    }
+
+    @Post('/verify-otp')
+    async verifyPhone(@Body() body: any) {
+        return await this.otpService.verifyPhone(body.phoneNumber, body.otp);
+    }
 
     @Post('/signup')
     async createUser(
@@ -29,7 +40,7 @@ export class AuthController {
     @UseGuards(RoleGuard)
     @Roles(Role.Admin)
     async createAdmin(
-        @Body() dto: SignupDTO,
+        @Body() dto: AdminSignupDTO,
     ) {
         return await this.authService.createAdmin(dto);
     }

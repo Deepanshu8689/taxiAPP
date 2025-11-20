@@ -160,6 +160,7 @@ export default function RideRequest() {
       }
 
       dispatch(setCurrentRide(createdRide))
+      localStorage.setItem('requestdRide', JSON.stringify(createdRide))
       socketRef.current.emit('BE-request-ride', createdRide)
 
       navigate('/rider/searching')

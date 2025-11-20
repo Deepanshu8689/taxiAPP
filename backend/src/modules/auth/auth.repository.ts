@@ -6,10 +6,11 @@ import { JwtService } from "@nestjs/jwt";
 import { ConfigService } from "@nestjs/config";
 import { Role } from "src/enum/role.enum";
 import { LoginDTO } from "src/dto/login.dto";
-import { SignupDTO } from "src/dto/signup.dto";
+import { AdminSignupDTO, SignupDTO } from "src/dto/signup.dto";
 import { User, UserDocument } from "src/schema/user.schema";
 import { Ride, RideDocument } from "src/schema/ride.schema";
 import { RideStatus } from "src/enum/rideStatus.enum";
+import { OTP, OTPDocument, OtpSchema } from "src/schema/otp.schema";
 
 @Injectable()
 export class AuthRepository {
@@ -18,6 +19,7 @@ export class AuthRepository {
         private jwtService: JwtService,
         private configService: ConfigService,
         @InjectModel(User.name) private userSchema: Model<UserDocument>,
+        @InjectModel(OTP.name) private otpSchema: Model<OTPDocument>,
         @InjectModel(Ride.name) private rideSchema: Model<RideDocument>,
     ) { }
 
@@ -60,78 +62,47 @@ export class AuthRepository {
 
     async userSignUp(dto: SignupDTO): Promise<User> {
         try {
-            const { emailId, firstName, lastName, password, phoneNumber, age, confirmPassword, role } = dto;
+            const { firstName, lastName, phoneNumber, emailId, age, role } = dto;
 
-            if (!emailId || !firstName || !lastName || !password || !phoneNumber || !age || !confirmPassword || !role) {
-                throw new Error('All fields are required')
+            if(!phoneNumber){
+                throw new NotFoundException('Phone number is required')
             }
 
-            if (role === Role.Admin) {
-                throw new Error('Admin role is not allowed')
-            }
-
-            if (password !== confirmPassword) {
-                throw new Error('Passwords do not match')
-            }
-
-            const existingUser = await this.userSchema.findOne({ emailId })
+            const existingUser = await this.userSchema.findOne({ phoneNumber })
             if (existingUser) {
-                throw new Error('User already exists')
+                throw new BadRequestException('User already exists')
             }
 
-            const hashedPass = await bcrypt.hash(password, 10);
-
-            const user = await this.userSchema.create({
-                emailId,
-                password: hashedPass,
-                firstName,
-                lastName,
-                phoneNumber,
-                age,
-                role,
-            })
-
-            if(role === Role.Driver){
-                user.drivingExperience = 0
-            }
-
-            await user.save();
+            const user = await this.userSchema.create(dto)
 
             return user;
 
         } catch (error) {
             console.log("error in signup: ", error)
-
+            throw new BadRequestException(error.message)
         }
     }
 
-    async createAdmin(dto: SignupDTO): Promise<User> {
+    async createAdmin(dto: AdminSignupDTO): Promise<User> {
         try {
-            const { emailId, firstName, lastName, password, phoneNumber, age, confirmPassword, role } = dto;
+            const { emailId, firstName, lastName, phoneNumber, age } = dto;
 
-            if (!emailId || !firstName || !lastName || !password || !phoneNumber || !age || !confirmPassword || !role) {
+            if (!emailId || !firstName || !lastName || !phoneNumber || !age ) {
                 throw new Error('All fields are required')
             }
 
-            if (password !== confirmPassword) {
-                throw new Error('Passwords do not match')
-            }
-
-            const existingUser = await this.userSchema.findOne({ emailId })
+            const existingUser = await this.userSchema.findOne({ phoneNumber })
             if (existingUser) {
                 throw new Error('User already exists')
             }
 
-            const hashedPass = await bcrypt.hash(password, 10);
-
             const admin = await this.userSchema.create({
                 emailId,
-                password: hashedPass,
                 firstName,
                 lastName,
                 phoneNumber,
                 age,
-                role
+                role: Role.Admin
             })
 
             return admin;
@@ -145,20 +116,23 @@ export class AuthRepository {
     async login(dto: LoginDTO): Promise<{ accessToken: string, cookie: any, user: any }> {
         try {
 
-            const { emailId, password } = dto;
-            if (!emailId || !password) {
+            const { phoneNumber, otp } = dto;
+            if (!phoneNumber || !otp) {
                 throw new Error('All fields are required')
             }
 
-            const user = await this.userSchema.findOne({ emailId })
+            const user = await this.userSchema.findOne({ phoneNumber })
             if (!user) {
-                throw new Error('User not found, Please signup first')
+                throw new NotFoundException('User not found, Please signup first')
             }
 
+            const latestOtp = await this.otpSchema.findOne({ phoneNumber }).sort({ createdAt: -1 });
+            if (!latestOtp) {
+                throw new NotFoundException('Otp not found')
+            }
 
-            const isMatch = await bcrypt.compare(password, user.password)
-            if (!isMatch) {
-                throw new Error('Invalid Credentials')
+            if(otp !== latestOtp.otp){
+                throw new BadRequestException('Invalid OTP')
             }
 
             const payload = {
@@ -174,6 +148,7 @@ export class AuthRepository {
                 user.status = 'busy';
                 await user.save();
             }
+
             else if (user.role === Role.Driver && !ride) {
                 user.status = 'available';
                 await user.save();
@@ -219,7 +194,7 @@ export class AuthRepository {
 
     async getFullUser(userId: string) {
         try {
-            const user = await this.userSchema.findById(userId).select('-password');
+            const user = await this.userSchema.findById(userId)
             if (!user) {
                 throw new NotFoundException('User not found');
             }

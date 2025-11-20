@@ -106,7 +106,16 @@ export class RideRepository {
         try {
 
             const ride = await this.rideSchema.findOne({ _id: id })
-                .populate('rider')
+                .populate({
+                    path: 'rider',
+                    model: User.name
+                }).populate({
+                    path: 'driver',
+                    model: User.name
+                }).populate({
+                    path: 'vehicle',
+                    model: Vehicle.name
+                })
             if (!ride) {
                 throw new Error("Ride not found")
             }
@@ -207,12 +216,7 @@ export class RideRepository {
         try {
             const { pickupLocation, dropLocation, vehicleType, distance, estimatedFare, pickupLat, pickupLng, dropLat, dropLng } = dto
             const rider = await this.userSchema.findById(user.sub)
-            if (!rider.isPhoneVerified) {
-                return {
-                    success: false,
-                    message: "Please verify your phone number first"
-                }
-            }
+
 
             const createdRide = await this.rideSchema.create({
                 pickupLocation,
@@ -602,7 +606,7 @@ export class RideRepository {
                     date: new Date()
                 })
             }
-            else{
+            else {
                 earning = await this.earningSchema.findOneAndUpdate({
                     _id: existingEarning._id
                 }, {
@@ -709,12 +713,6 @@ export class RideRepository {
         try {
             const { pickupLocation, dropLocation, vehicleType, distance, estimatedFare, pickupLat, pickupLng, dropLat, dropLng, scheduleDate } = dto
             const rider = await this.userSchema.findById(user.sub)
-            if (!rider.isPhoneVerified) {
-                return {
-                    success: false,
-                    message: "Please verify your phone number first"
-                }
-            }
             console.log("date: ", scheduleDate)
             const scheduledRide = await this.rideSchema.create({
                 pickupLocation,

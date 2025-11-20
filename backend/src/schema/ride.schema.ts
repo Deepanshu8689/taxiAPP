@@ -43,7 +43,7 @@ export class Ride {
 
     @Prop({ type: Number, required: true }) distance: number
 
-    @Prop({ default: null, type: Types.ObjectId, ref: 'Rating' })
+    @Prop({ type: Types.ObjectId, ref: 'Rating' })
     rating?: Rating
 
     @Prop({ default: null, type: Types.ObjectId, ref: 'Earning' })

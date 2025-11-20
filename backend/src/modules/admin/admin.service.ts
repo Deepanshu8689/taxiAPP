@@ -21,9 +21,9 @@ export class AdminService {
         return this.adminRepo.verifyDriver(id)
     }
 
-    async updatePassword(user: any, password: string, newPassword: string, confirmNewPassword: string) {
-        return this.adminRepo.updatePassword(user, password, newPassword, confirmNewPassword)
-    }
+    // async updatePassword(user: any, password: string, newPassword: string, confirmNewPassword: string) {
+    //     return this.adminRepo.updatePassword(user, password, newPassword, confirmNewPassword)
+    // }
 
     async updateProfile(user: any, dto: UpdateUserDTO) {
         return this.adminRepo.updateProfile(user, dto)

@@ -3,7 +3,7 @@ import { OtpSmsService } from "../otp-sms/otp-sms.service";
 import { MailerService } from "@nestjs-modules/mailer";
 import { InjectModel } from "@nestjs/mongoose";
 import { OTP, OTPDocument } from "src/schema/otp.schema";
-import { Model } from "mongoose";
+import { Model, Types } from "mongoose";
 import { Role } from "src/enum/role.enum";
 import { VehicleDTO } from "src/dto/vehicle.dto";
 import * as bcrypt from 'bcrypt'
@@ -14,6 +14,8 @@ import { Vehicle, VehicleDocument } from "src/schema/vehicle.schema";
 import { User, UserDocument } from "src/schema/user.schema";
 import { BankDetailsDTO } from "src/dto/bankDetails.dto";
 import { PayoutService } from "../payout/payout.service";
+import { UpdateDriverDTO } from "src/dto/updateDriver.dto";
+import { Rating, RatingDocument } from "src/schema/rating.schema";
 
 @Injectable()
 export class DriverRepository {
@@ -25,6 +27,7 @@ export class DriverRepository {
         private payoutService: PayoutService,
         @InjectModel(User.name) private userSchema: Model<UserDocument>,
         @InjectModel(OTP.name) private otpSchema: Model<OTPDocument>,
+        @InjectModel(Rating.name) private ratingSchema: Model<RatingDocument>,
         @InjectModel(Vehicle.name) private vehicleSchema: Model<VehicleDocument>,
     ) {
 
@@ -43,7 +46,7 @@ export class DriverRepository {
     async updateVehicleDetails(user: any, dto: VehicleDTO) {
         try {
             // console.log("dto: ", dto)
-            const driverDetails = await this.userSchema.findOne({ _id: user.sub, isEmailVerified: true, isPhoneVerified: true })
+            const driverDetails = await this.userSchema.findOne({ _id: user.sub, isEmailVerified: true })
             if (!driverDetails) {
                 throw new NotFoundException("Verify your email and phone number first")
             }
@@ -59,7 +62,7 @@ export class DriverRepository {
                 }
             }
 
-            if (driverDetails.isEmailVerified && driverDetails.isPhoneVerified) {
+            if (driverDetails.isEmailVerified) {
                 const vehicle = new this.vehicleSchema({
                     ...dto,
                     driver: driverId
@@ -80,47 +83,47 @@ export class DriverRepository {
         }
     }
 
-    async updatePassword(user: any, password: string, newPassword: string, confirmNewPassword: string) {
-        try {
-            const loggedInUser = await this.userSchema.findById(user.sub)
-            if (!loggedInUser) {
-                throw new NotFoundException('Login again')
-            }
+    // async updatePassword(user: any, password: string, newPassword: string, confirmNewPassword: string) {
+    //     try {
+    //         const loggedInUser = await this.userSchema.findById(user.sub)
+    //         if (!loggedInUser) {
+    //             throw new NotFoundException('Login again')
+    //         }
 
-            if (!newPassword && !confirmNewPassword && !password) {
-                throw new BadRequestException('All fields are required')
-            }
+    //         if (!newPassword && !confirmNewPassword && !password) {
+    //             throw new BadRequestException('All fields are required')
+    //         }
 
-            if (newPassword !== confirmNewPassword) {
-                throw new BadRequestException('Passwords do not match')
-            }
+    //         if (newPassword !== confirmNewPassword) {
+    //             throw new BadRequestException('Passwords do not match')
+    //         }
 
-            const isMatch = await bcrypt.compare(password, loggedInUser.password)
-            if (!isMatch) {
-                throw new BadRequestException('Old password is incorrect')
-            }
+    //         const isMatch = await bcrypt.compare(password, loggedInUser.password)
+    //         if (!isMatch) {
+    //             throw new BadRequestException('Old password is incorrect')
+    //         }
 
-            const isMatchSame = await bcrypt.compare(newPassword, loggedInUser.password)
-            if (isMatchSame) {
-                throw new BadRequestException('New password cannot be same as old password')
-            }
+    //         const isMatchSame = await bcrypt.compare(newPassword, loggedInUser.password)
+    //         if (isMatchSame) {
+    //             throw new BadRequestException('New password cannot be same as old password')
+    //         }
 
-            const hashedPass = await bcrypt.hash(newPassword, 10);
-            loggedInUser.password = hashedPass
+    //         const hashedPass = await bcrypt.hash(newPassword, 10);
+    //         loggedInUser.password = hashedPass
 
-            await loggedInUser.save();
-            return {
-                message: "Password updated successfully",
-                loggedInUser
-            }
+    //         await loggedInUser.save();
+    //         return {
+    //             message: "Password updated successfully",
+    //             loggedInUser
+    //         }
 
-        } catch (error) {
-            console.log("error in updatePassword: ", error)
-            throw error
-        }
-    }
+    //     } catch (error) {
+    //         console.log("error in updatePassword: ", error)
+    //         throw error
+    //     }
+    // }
 
-    async updateProfile(user: any, dto: UpdateUserDTO) {
+    async updateProfile(user: any, dto: UpdateDriverDTO) {
         try {
 
             const loggedInUser = await this.userSchema.findById(user.sub)
@@ -131,9 +134,8 @@ export class DriverRepository {
                     if (!loggedInUser) {
                         throw new NotFoundException('User not found')
                     }
-                    const emailId = loggedInUser.emailId;
 
-                    const latestOtp = await this.otpSchema.findOne({ emailId }).sort({ createdAt: -1 });
+                    const latestOtp = await this.otpSchema.findOne({ phoneNumber }).sort({ createdAt: -1 });
                     if (!latestOtp) {
                         throw new NotFoundException('Otp not found')
                     }
@@ -153,11 +155,10 @@ export class DriverRepository {
 
             if (loggedInUser.role === 'driver') {
                 if (dto.emailId) updateData.isEmailVerified = false
-                if (dto.phoneNumber) updateData.isPhoneVerified = false
             }
 
             const updatedAccount = await this.userSchema.findOneAndUpdate(
-                { emailId: loggedInUser.emailId },
+                { phoneNumber: loggedInUser.phoneNumber },
                 updateData,
                 { new: true },
             )
@@ -243,7 +244,7 @@ export class DriverRepository {
                 fundAccountId = fund.id;
                 driver.razorpayFundAccountId = fundAccountId;
             }
-            
+
             await driver.save();
 
             return driver
@@ -260,6 +261,37 @@ export class DriverRepository {
             return vehicle
         } catch (error) {
             console.log("error in getVehicle: ", error)
+            throw error
+        }
+    }
+
+    async getRatings(user: any) {
+        try {
+            // const ratings = await this.userSchema.findById(user.sub).populate('ratings') 
+
+            const ratings = await this.userSchema.aggregate([
+                { $match: { _id: new Types.ObjectId(user.sub) } },
+                {
+                    $lookup: {
+                        from: "ratings",
+                        localField: 'ratings',
+                        foreignField: '_id',
+                        as: 'ratingDetails'
+                    }
+                },
+                {
+                    $project: {
+                        _id: 1,
+                        totalRatings: { $size: '$ratingDetails' },
+                        averageRating: { $avg: '$ratingDetails.overallRating' }
+                    }
+                }
+            ])
+            console.log("ratings: ", ratings)
+
+            return ratings[0]   
+        } catch (error) {
+            console.log("error in getRatings: ", error)
             throw error
         }
     }

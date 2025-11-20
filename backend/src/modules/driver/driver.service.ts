@@ -3,6 +3,7 @@ import { DriverRepository } from './driver.repository';
 import { VehicleDTO } from 'src/dto/vehicle.dto';
 import { UpdateUserDTO } from 'src/dto/updateUser.dto';
 import { CommonService } from '../common/common.service';
+import { UpdateDriverDTO } from 'src/dto/updateDriver.dto';
 
 @Injectable()
 export class DriverService {
@@ -19,11 +20,11 @@ export class DriverService {
         return this.driverRepo.updateVehicleDetails(user, dto)
     }
 
-    async updatePassword(user: any, password: string, newPassword: string, confirmNewPassword: string) {
-        return this.driverRepo.updatePassword(user, password, newPassword, confirmNewPassword)
-    }
+    // async updatePassword(user: any, password: string, newPassword: string, confirmNewPassword: string) {
+    //     return this.driverRepo.updatePassword(user, password, newPassword, confirmNewPassword)
+    // }
 
-    async updateProfile(user: any, dto: UpdateUserDTO) {
+    async updateProfile(user: any, dto: UpdateDriverDTO) {
         return this.driverRepo.updateProfile(user, dto)
     }
 
@@ -41,6 +42,10 @@ export class DriverService {
 
     async getVehicle(id: string) {
         return this.driverRepo.getVehicle(id)
+    }
+
+    async getRatings(user: any){
+        return await this.driverRepo.getRatings(user)
     }
 
 }

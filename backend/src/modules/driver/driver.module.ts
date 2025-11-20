@@ -13,6 +13,8 @@ import { User, UserSchema } from 'src/schema/user.schema';
 import { PayoutService } from '../payout/payout.service';
 import { CloudinaryService } from '../cloudinary/cloudinary.service';
 import { WalletService } from '../wallet/wallet.service';
+import { Ride, RideSchema } from 'src/schema/ride.schema';
+import { Rating, RatingSchema } from 'src/schema/rating.schema';
 
 @Module({
   imports: [
@@ -20,6 +22,7 @@ import { WalletService } from '../wallet/wallet.service';
       { name: User.name, schema: UserSchema },
       { name: OTP.name, schema: OtpSchema },
       { name: Vehicle.name, schema: VehicleSchema },
+      { name: Rating.name, schema: RatingSchema },
     ]),
     JwtModule.registerAsync({
       inject: [ConfigService],

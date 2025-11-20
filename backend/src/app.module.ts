@@ -1,5 +1,4 @@
 import { Module } from '@nestjs/common';
-import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { UserModule } from './modules/user/user.module';
 import { ConfigModule } from '@nestjs/config';
@@ -19,6 +18,8 @@ import { CloudinaryModule } from './modules/cloudinary/cloudinary.module';
 import { v2 as cloudinary } from 'cloudinary';
 import { ChatModule } from './modules/chat/chat.module';
 import { NotificationModule } from './modules/notification/notification.module';
+import { RatingsModule } from './modules/ratings/ratings.module';
+import { AppController } from './app.controller';
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -52,6 +53,7 @@ import { NotificationModule } from './modules/notification/notification.module';
     CloudinaryModule,
     ChatModule,
     NotificationModule,
+    RatingsModule,
   ],
   controllers: [AppController, NotificationController],
   providers: [AppService, CommonService],

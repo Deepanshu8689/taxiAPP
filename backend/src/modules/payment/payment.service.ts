@@ -23,8 +23,7 @@ export class PaymentService {
 
     async createOrder(amount: number, user: any) {
         try {
-            console.log("amount: ", amount)
-            console.log("user: ", user)
+
             const userData = await this.userSchema.findById(user.sub);
             if (!userData) {
                 throw new Error("User not found");
@@ -37,7 +36,7 @@ export class PaymentService {
                 notes: {
                     firstName: userData.firstName,
                     lastName: userData.lastName,
-                    "emailId": user.emailId,
+                    phoneNumber: user.phoneNumber,
                 }
             })
 

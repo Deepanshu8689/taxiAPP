@@ -36,13 +36,13 @@ export class AdminController {
         return await this.adminService.verifyDriver(id)
     }
 
-    @Patch('/updatePassword')
-    async updatePassword(
-        @User() user: any,
-        @Body() body: any
-    ) {
-        return await this.adminService.updatePassword(user, body.password, body.newPassword, body.confirmNewPassword)
-    }
+    // @Patch('/updatePassword')
+    // async updatePassword(
+    //     @User() user: any,
+    //     @Body() body: any
+    // ) {
+    //     return await this.adminService.updatePassword(user, body.password, body.newPassword, body.confirmNewPassword)
+    // }
 
 
     @Patch('/updateProfile')

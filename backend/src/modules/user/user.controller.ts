@@ -6,12 +6,9 @@ import { RoleGuard } from 'src/common/guards/role/role.guard';
 import { Roles } from 'src/common/decorators/role.decorator';
 import { Role } from 'src/enum/role.enum';
 import { User } from 'src/common/decorators/req-user.decorator';
-import { VehicleDTO } from 'src/dto/vehicle.dto';
 import { FileInterceptor, FilesInterceptor } from '@nestjs/platform-express';
-import { multerUserConfig, multerVehicleConfig } from 'src/config/multer.config';
 import { UpdateUserDTO } from 'src/dto/updateUser.dto';
 import { LocationDTO } from 'src/dto/location.dto';
-import { CloudinaryMulterConfig } from 'src/config/cloudinary.config';
 import { CloudinaryService } from '../cloudinary/cloudinary.service';
 
 @Controller('user')
@@ -40,13 +37,13 @@ export class UserController {
         return await this.otpService.verifyPhone(user, body.sms);
     }
 
-    @Patch('/updatePassword')
-    async updatePassword(
-        @User() user: any,
-        @Body() body: any
-    ) {
-        return await this.userService.updatePassword(user, body.password, body.newPassword, body.confirmNewPassword)
-    }
+    // @Patch('/updatePassword')
+    // async updatePassword(
+    //     @User() user: any,
+    //     @Body() body: any
+    // ) {
+    //     return await this.userService.updatePassword(user, body.password, body.newPassword, body.confirmNewPassword)
+    // }
 
 
     @Patch('/updateProfile')
@@ -66,14 +63,19 @@ export class UserController {
         return this.userService.updateProfile(user, dto)
     }
 
-    @Get('/allDrivers')
-    async getAllDrivers() {
-        return await this.userService.fetchAllDrivers()
-    }
+    // @Get('/allDrivers')
+    // async getAllDrivers() {
+    //     return await this.userService.fetchAllDrivers()
+    // }
 
     @Patch('/updateCurrentLocation')
     async updateCurrentLocation(@User() user: any, @Body() dto: LocationDTO) {
         return await this.userService.updateCurrentLocation(user, dto)
+    }
+
+    @Get('/getRatings')
+    async getRatings(@User() user: any) {
+        return await this.userService.getRatings(user)
     }
 
 }

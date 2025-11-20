@@ -78,10 +78,10 @@ const RideHistory = () => {
   }
 
   const handleRideClick = (ride) => {
-    if (ride.status === 'completed') {
-      const basePath = user.role === 'driver' ? '/driver' : '/rider'
-      navigate(`${basePath}/complete/${ride._id}`)
-    }
+    // if (ride.status === 'completed') {
+    //   const basePath = user.role === 'driver' ? '/driver' : '/rider'
+    //   navigate(`${basePath}/complete/${ride._id}`)
+    // }
   }
 
   if (loading) {
@@ -133,7 +133,6 @@ const RideHistory = () => {
               <div
                 key={ride._id}
                 className="ride-history-card"
-                onClick={() => handleRideClick(ride)}
                 style={{ cursor: ride.status === 'completed' ? 'pointer' : 'default' }}
               >
                 <div className="ride-header">
@@ -178,6 +177,11 @@ const RideHistory = () => {
                       </span>
                       <span className="person-label">Rider</span>
                     </div>
+                    {ride.status === 'completed' && <div>
+                      <button className='ride-rating' onClick={() => navigate(`/driver/rate/${ride._id}`)}>
+                        Exchange Ratings
+                      </button>
+                    </div>}
                   </div>
                 ) : (
                   <div className="ride-person">
@@ -190,6 +194,11 @@ const RideHistory = () => {
                       </span>
                       <span className="person-label">Driver</span>
                     </div>
+                    {ride.status === 'completed' && <div>
+                      <button className='ride-rating' onClick={() => navigate(`/rider/rate/${ride._id}`)}>
+                        Exchange Ratings
+                      </button>
+                    </div>}
                   </div>
                 )}
 

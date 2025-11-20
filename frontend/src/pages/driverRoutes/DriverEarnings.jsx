@@ -296,9 +296,7 @@ const DriverEarnings = () => {
             <div className={`status-item ${profile?.isEmailVerified ? 'verified' : 'unverified'}`}>
               {profile?.isEmailVerified ? '✓' : '✗'} Email Verified
             </div>
-            <div className={`status-item ${profile?.isPhoneVerified ? 'verified' : 'unverified'}`}>
-              {profile?.isPhoneVerified ? '✓' : '✗'} Phone Verified
-            </div>
+          
             <div className={`status-item ${profile?.isVerified ? 'verified' : 'unverified'}`}>
               {profile?.isVerified ? '✓' : '✗'} Account Verified
             </div>

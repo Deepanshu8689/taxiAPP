@@ -28,7 +28,7 @@ async function bootstrap() {
     credentials: true,
   });
 
-  app.use('/uploads', express.static(join(__dirname, '..', 'uploads')));
+  // app.use('/uploads', express.static(join(__dirname, '..', 'uploads')));
   await app.listen(process.env.PORT ?? 4000);
   console.log("Server started on port: ", process.env.PORT ?? 4000)
 }

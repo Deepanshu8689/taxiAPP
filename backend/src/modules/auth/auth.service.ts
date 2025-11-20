@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { AuthRepository } from './auth.repository';
 import { LoginDTO } from 'src/dto/login.dto';
-import { SignupDTO } from 'src/dto/signup.dto';
+import { AdminSignupDTO, SignupDTO } from 'src/dto/signup.dto';
 import { User } from 'src/schema/user.schema';
 
 @Injectable()
@@ -18,7 +18,7 @@ export class AuthService {
             return await this.authRepo.userSignUp(dto)
         }
         
-        async createAdmin(dto: SignupDTO): Promise<User>{
+        async createAdmin(dto: AdminSignupDTO): Promise<User>{
             return await this.authRepo.createAdmin(dto)
         }
     

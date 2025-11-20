@@ -4,7 +4,10 @@ import { Document } from "mongoose";
 @Schema({timestamps: true})
 export class OTP{
     @Prop({required: true})
-    emailId: string
+    phoneNumber: string
+
+    @Prop()
+    emailId?: string
 
     @Prop({required: true})
     otp: string

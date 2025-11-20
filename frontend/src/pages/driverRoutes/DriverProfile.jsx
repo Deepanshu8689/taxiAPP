@@ -12,6 +12,7 @@ const DriverProfile = () => {
   const [editing, setEditing] = useState(null) // 'personal', 'vehicle', 'bank', 'password'
   const [saving, setSaving] = useState(false)
   const [showVerifyInput, setShowVerifyInput] = useState(false)
+  const [ratings, setRatings] = useState(0)
 
   const [formData, setFormData] = useState({
     // Personal
@@ -44,10 +45,27 @@ const DriverProfile = () => {
 
   useEffect(() => {
     fetchProfile()
+    fetchRatings()
     // fetchVehicle()
   }, [])
 
-  
+  const fetchRatings = async () => {
+    try {
+      const res = await fetch('http://localhost:3000/driver/getRatings', {
+        credentials: 'include'
+      })
+      if (!res.ok) throw new Error('Failed to fetch ratings')
+      const data = await res.json()
+
+      console.log('Fetched ratings:', data)
+      if(res.ok){
+        setRatings(data.averageRating)
+      }
+    } catch (error) {
+      console.error('Error fetching ratings:', error)
+      throw error
+    }
+  }  
 
   const fetchProfile = async () => {
     try {
@@ -252,42 +270,6 @@ const DriverProfile = () => {
     }
   }
 
-  const handlePasswordSubmit = async (e) => {
-    e.preventDefault()
-
-    if (formData.newPassword !== formData.confirmNewPassword) {
-      alert('New passwords do not match')
-      return
-    }
-
-    setSaving(true)
-
-    try {
-      const res = await fetch('http://localhost:3000/driver/updatePassword', {
-        method: 'PATCH',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        credentials: 'include',
-        body: JSON.stringify({
-          password: formData.password,
-          newPassword: formData.newPassword,
-          confirmNewPassword: formData.confirmNewPassword
-        })
-      })
-
-      if (!res.ok) throw new Error('Password update failed')
-
-      setEditing(null)
-      setFormData({ ...formData, password: '', newPassword: '', confirmNewPassword: '' })
-      alert('Password updated successfully!')
-    } catch (error) {
-      console.error('Password update error:', error)
-      alert('Failed to update password')
-    } finally {
-      setSaving(false)
-    }
-  }
 
   const cancelEdit = () => {
     setEditing(null)
@@ -351,62 +333,7 @@ const DriverProfile = () => {
     }
   }
 
-  const sendSmsHandler = async () => {
-    setShowVerifyInput(true)
-    try {
-      const res = await fetch('http://localhost:3000/driver/sendSms', {
-        method: 'Post',
-        credentials: 'include',
-        headers: {
-          'Content-Type': 'application/json'
-        }
-      })
-
-      const data = await res.json()
-
-      if (data.savedOtp) {
-        setShowVerifyInput(true)
-      }
-
-    } catch (error) {
-      console.log("error in send sms Handler: ", error)
-      throw error
-    }
-  }
-
-  const handleVerifySms = async (e) => {
-    e.preventDefault()
-    try {
-
-      const res = await fetch('http://localhost:3000/user/verifyPhone', {
-        method: 'Post',
-        credentials: 'include',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ sms: otp })
-      })
-
-      if (!res.ok) {
-        throw new Error("Invalid OTP")
-      }
-
-      const data = await res.json()
-
-      if (data) {
-        alert("Phone number verified")
-      }
-
-      dispatch(updateUser({ isPhoneVerified: true }))
-      setShowVerifyInput(false)
-      setVerifying(false)
-      setOtp('')
-
-    } catch (error) {
-      console.log("error in handleVerifySms: ", error)
-      throw error
-    }
-  }
+  
 
   if (loading) {
     return (
@@ -434,7 +361,7 @@ const DriverProfile = () => {
           <p className="driver-profile-role">Driver</p>
           <div className="driver-stats-row">
             <div className="stat-badge">
-              <span className="stat-value">⭐ {profile?.rating?.toFixed(1) || '0.0'}</span>
+              <span className="stat-value">⭐ {ratings.toFixed(1) || '0.0'}</span>
               <span className="stat-label">Rating</span>
             </div>
             <div className="stat-badge">
@@ -565,7 +492,7 @@ const DriverProfile = () => {
               </div>
               <div className="info-item">
                 <span className="info-label">Driving Experience</span>
-                <span className="info-value">{profile?.drivingExperience}</span>
+                <span className="info-value">{profile?.drivingExperience || 'Not set'}</span>
               </div>
               <div className="info-item">
                 <span className="info-label">Email</span>
@@ -611,43 +538,6 @@ const DriverProfile = () => {
               <div className="info-item">
                 <span className="info-label">Phone Number</span>
                 <span className="info-value">{profile?.phoneNumber}</span>
-                {user?.isPhoneVerified ? (
-                  <span className="verified-badge">✅ Verified</span>
-                ) : (
-                  <div className="verify-container">
-                    {(!showVerifyInput && !user?.isPhoneVerified) ? (
-                      <button className="verify-btn" onClick={sendSmsHandler}>
-                        Verify
-                      </button>
-                    ) : (
-                      <div className="verify-input-wrapper">
-                        <input
-                          type="text"
-                          placeholder="Enter OTP"
-                          className="verify-input"
-                          value={otp}
-                          onChange={(e) => setOtp(e.target.value)}
-                        />
-                        <button
-                          className="verify-submit-btn"
-                          onClick={handleVerifySms}
-                          disabled={verifying}
-                        >
-                          {verifying ? "Verifying..." : "Submit"}
-                        </button>
-                        <button
-                          className="verify-cancel-btn"
-                          onClick={() => {
-                            setShowVerifyInput(false);
-                            setOtp("");
-                          }}
-                        >
-                          ✕
-                        </button>
-                      </div>
-                    )}
-                  </div>
-                )}
               </div>
               <div className="info-item">
                 <span className="info-label">Driving Licence</span>
@@ -667,7 +557,7 @@ const DriverProfile = () => {
         <div className="profile-section">
           <div className="section-header">
             <h3>Vehicle Information</h3>
-            {(editing !== 'vehicle' && user.isEmailVerified && user.isPhoneVerified) && (
+            {(editing !== 'vehicle' && user.isEmailVerified) && (
               <button className="edit-icon-btn" onClick={() => setEditing('vehicle')}>
                 ✏️
               </button>
@@ -851,7 +741,7 @@ const DriverProfile = () => {
         <div className="profile-section">
           <div className="section-header">
             <h3>Bank Details</h3>
-            {(editing !== 'bank' && user.isEmailVerified && user.isPhoneVerified) && (
+            {(editing !== 'bank' && user.isEmailVerified) && (
               <button className="edit-icon-btn" onClick={() => setEditing('bank')}>
                 ✏️
               </button>
@@ -947,64 +837,6 @@ const DriverProfile = () => {
                 <span className="info-value">{profile?.razorpayFundAccountId || 'Not set'}</span>
               </div>
             </div>
-          )}
-        </div>
-
-        {/* Change Password */}
-        <div className="profile-section">
-          <div className="section-header">
-            <h3>Change Password</h3>
-            {editing !== 'password' && (
-              <button className="edit-icon-btn" onClick={() => setEditing('password')}>
-                ✏️
-              </button>
-            )}
-          </div>
-
-          {editing === 'password' && (
-            <form onSubmit={handlePasswordSubmit} className="edit-form">
-              <div className="form-group">
-                <label>Current Password</label>
-                <input
-                  type="password"
-                  name="password"
-                  value={formData.password}
-                  onChange={handleInputChange}
-                  required
-                />
-              </div>
-
-              <div className="form-group">
-                <label>New Password</label>
-                <input
-                  type="password"
-                  name="newPassword"
-                  value={formData.newPassword}
-                  onChange={handleInputChange}
-                  required
-                />
-              </div>
-
-              <div className="form-group">
-                <label>Confirm New Password</label>
-                <input
-                  type="password"
-                  name="confirmNewPassword"
-                  value={formData.confirmNewPassword}
-                  onChange={handleInputChange}
-                  required
-                />
-              </div>
-
-              <div className="form-actions">
-                <button type="button" className="cancel-btn" onClick={cancelEdit}>
-                  Cancel
-                </button>
-                <button type="submit" className="save-btn" disabled={saving}>
-                  {saving ? 'Updating...' : 'Update Password'}
-                </button>
-              </div>
-            </form>
           )}
         </div>
       </div>

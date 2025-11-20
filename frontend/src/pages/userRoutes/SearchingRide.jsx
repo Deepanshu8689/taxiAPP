@@ -15,12 +15,16 @@ const SearchingRide = () => {
   useEffect(() => {
     const socket = createSocketConnection();
     socketRef.current = socket;
+
     getRequestedRide();
+    
     socketRef.current.on('FE-ride-accepted', (acceptedRide) => {
       if (!acceptedRide) {
         throw new Error('Ride not found')
       }
       // locationHandler()
+      localStorage.removeItem('requestedRide')
+      localStorage.setItem('acceptedRide', JSON.stringify(acceptedRide))
       dispatch(setCurrentRide(acceptedRide))
       setRide(acceptedRide)
       navigate('/rider/tracking')

@@ -75,45 +75,45 @@ export class AdminRepository {
         }
     }
 
-    async updatePassword(user: any, password: string, newPassword: string, confirmNewPassword: string) {
-        try {
-            const loggedInUser = await this.userSchema.findById(user.sub)
-            if (!loggedInUser) {
-                throw new NotFoundException('Login again')
-            }
+    // async updatePassword(user: any, password: string, newPassword: string, confirmNewPassword: string) {
+    //     try {
+    //         const loggedInUser = await this.userSchema.findById(user.sub)
+    //         if (!loggedInUser) {
+    //             throw new NotFoundException('Login again')
+    //         }
 
-            if (!newPassword && !confirmNewPassword && !password) {
-                throw new BadRequestException('All fields are required')
-            }
+    //         if (!newPassword && !confirmNewPassword && !password) {
+    //             throw new BadRequestException('All fields are required')
+    //         }
 
-            if (newPassword !== confirmNewPassword) {
-                throw new BadRequestException('Passwords do not match')
-            }
+    //         if (newPassword !== confirmNewPassword) {
+    //             throw new BadRequestException('Passwords do not match')
+    //         }
 
-            const isMatch = await bcrypt.compare(password, loggedInUser.password)
-            if (!isMatch) {
-                throw new BadRequestException('Old password is incorrect')
-            }
+    //         const isMatch = await bcrypt.compare(password, loggedInUser.password)
+    //         if (!isMatch) {
+    //             throw new BadRequestException('Old password is incorrect')
+    //         }
 
-            const isMatchSame = await bcrypt.compare(newPassword, loggedInUser.password)
-            if (isMatchSame) {
-                throw new BadRequestException('New password cannot be same as old password')
-            }
+    //         const isMatchSame = await bcrypt.compare(newPassword, loggedInUser.password)
+    //         if (isMatchSame) {
+    //             throw new BadRequestException('New password cannot be same as old password')
+    //         }
 
-            const hashedPass = await bcrypt.hash(newPassword, 10);
-            loggedInUser.password = hashedPass
+    //         const hashedPass = await bcrypt.hash(newPassword, 10);
+    //         loggedInUser.password = hashedPass
 
-            await loggedInUser.save();
-            return {
-                message: "Password updated successfully",
-                loggedInUser
-            }
+    //         await loggedInUser.save();
+    //         return {
+    //             message: "Password updated successfully",
+    //             loggedInUser
+    //         }
 
-        } catch (error) {
-            console.log("error in updatePassword: ", error)
-            throw error
-        }
-    }
+    //     } catch (error) {
+    //         console.log("error in updatePassword: ", error)
+    //         throw error
+    //     }
+    // }
 
     async updateProfile(user: any, dto: UpdateUserDTO) {
         try {
@@ -125,9 +125,8 @@ export class AdminRepository {
                     if (!loggedInUser) {
                         throw new NotFoundException('User not found')
                     }
-                    const emailId = loggedInUser.emailId;
 
-                    const latestOtp = await this.otpSchema.findOne({ emailId }).sort({ createdAt: -1 });
+                    const latestOtp = await this.otpSchema.findOne({ phoneNumber }).sort({ createdAt: -1 });
                     if (!latestOtp) {
                         throw new NotFoundException('Otp not found')
                     }
@@ -145,13 +144,10 @@ export class AdminRepository {
 
             const updateData: any = { ...dto }
 
-            if (loggedInUser.role === 'driver') {
-                if (dto.emailId) updateData.isEmailVerified = false
-                if (dto.phoneNumber) updateData.isPhoneVerified = false
-            }
+            
 
             const updatedAccount = await this.userSchema.findOneAndUpdate(
-                { emailId: loggedInUser.emailId },
+                { phoneNumber: loggedInUser.phoneNumber },
                 updateData,
                 { new: true },
             )

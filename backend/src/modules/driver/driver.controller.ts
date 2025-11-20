@@ -76,13 +76,13 @@ export class DriverController {
         return this.driverService.updateVehicleDetails(user, dto)
     }
 
-    @Patch('/updatePassword')
-    async updatePassword(
-        @User() user: any,
-        @Body() body: any
-    ) {
-        return await this.driverService.updatePassword(user, body.password, body.newPassword, body.confirmNewPassword)
-    }
+    // @Patch('/updatePassword')
+    // async updatePassword(
+    //     @User() user: any,
+    //     @Body() body: any
+    // ) {
+    //     return await this.driverService.updatePassword(user, body.password, body.newPassword, body.confirmNewPassword)
+    // }
 
     @Patch('/updateProfile')
     @UseInterceptors(
@@ -125,5 +125,8 @@ export class DriverController {
     }
 
     
-
+    @Get('/getRatings')
+    async getRatings(@User() user: any){
+        return await this.driverService.getRatings(user)
+    }
 }

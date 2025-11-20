@@ -1,183 +1,207 @@
-import { useContext, useState } from "react";
-import { useNavigate } from "react-router-dom";
-import "../../styles/auth/login.css";
-import { useDispatch } from "react-redux";
-import { addUser } from "../../utils/Redux/userSlice";
+import { useState } from 'react';
+import { useNavigate, Link } from 'react-router-dom';
+import { useDispatch } from 'react-redux';
+import { addUser } from '../../utils/Redux/userSlice';
+import '../../styles/auth/auth.css';
+import { toast } from 'react-toastify';
 
-export default function Login() {
-    // const navigate = useNavigate();
-    // const dispatch = useDispatch()
-    // const [emailId, setEmailId] = useState("")
-    // const [password, setPassword] = useState("")
+const Login = () => {
+    const [phoneNumber, setPhoneNumber] = useState('');
+    const [otp, setOtp] = useState('');
+    const [otpSent, setOtpSent] = useState(false);
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState('');
     const navigate = useNavigate();
     const dispatch = useDispatch();
-    const [emailId, setEmailId] = useState("");
-    const [password, setPassword] = useState("");
-    const [loading, setLoading] = useState(false);
-    const [error, setError] = useState("");
 
-    const locationHandler = async () => {
-        try {
-            if (!navigator.geolocation) {
-                alert("Geolocation is not supported by this browser.")
-                return
-            }
-
-            navigator.geolocation.getCurrentPosition(
-                async (pos) => {
-                    const { latitude, longitude } = pos.coords
-
-                    const res = await fetch(
-                        `http://localhost:3000/driver/updateCurrentLocation`,
-                        {
-                            method: "PATCH",
-                            headers: {
-                                "Content-Type": "application/json"
-                            },
-                            credentials: "include",
-                            body: JSON.stringify({ latitude, longitude })
-                        }
-                    )
-
-                    if (res.ok) {
-                        alert("Location updated successfully!")
-                    }
-                },
-                (error) => {
-                    console.error("Geolocation error:", error)
-                    alert("Failed to get location. Please enable location services.")
-                }
-            )
-        } catch (error) {
-            console.error("Error in locationHandler:", error)
-            alert("Failed to update location")
-        } 
-    }
-
-    const handleSubmit = async (e) => {
+    const handleSendOTP = async (e) => {
         e.preventDefault();
-        setError("");
-        
-        if (!emailId || !password) {
-            setError("All fields are required");
+        setError('');
+
+        if (phoneNumber.length !== 10) {
+            setError('Please enter a valid 10-digit phone number');
             return;
         }
 
         setLoading(true);
         try {
-            
+            const response = await fetch('http://localhost:3000/auth/send-otp', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ phoneNumber: "+91" + phoneNumber }),
+                credentials: 'include'
+            });
 
-            const res = await fetch("http://localhost:3000/auth/login", {
-                method: "Post",
-                headers: {
-                    "Content-Type": "application/json"
-                },
-                credentials: "include",
-                body: JSON.stringify({ emailId, password })
-            })
-            const data = await res.json()
-            
-            if (data.statusCode === 500 || !res.ok) {
-                throw new Error(data.message || "Login failed");
+            const data = await response.json();
+            console.log("data: ", data)
+            if (response.ok) {
+                toast.success(data.message)
+                setOtpSent(true);
+            } else {
+                toast.error(data.message)
+                setError(data.message || 'Failed to send OTP');
             }
-            
-            dispatch(addUser(data.user))
+        } catch (err) {
+            setError('Network error. Please try again.');
+        } finally {
+            setLoading(false);
+        }
+    };
 
-            if(data.user.role === 'driver'){
-                locationHandler()
-                navigate('/driver/home')
-            }
-            else if(data.user.role === 'user'){
-                navigate('/ride-request')
-            }
-            else{
-                navigate('/admin-dashboard')
+    const handleVerifyOTP = async (e) => {
+        e.preventDefault();
+        setError('');
+
+        if (otp.length !== 6) {
+            setError('Please enter a valid 6-digit OTP');
+            return;
+        }
+
+        setLoading(true);
+        try {
+            const response = await fetch('http://localhost:3000/auth/verify-otp', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ phoneNumber: "+91" + phoneNumber, otp }),
+                credentials: 'include'
+            });
+
+
+            if (!response.ok) {
+                toast.error(data.message)
+                setError(data.message)
+                return
             }
 
-            // navigate('/')
-        } catch (error) {
-            console.error("Error in Login:", error);
-            setError(error.message || "Something went wrong");
+            const res = await fetch('http://localhost:3000/auth/login', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ phoneNumber: "+91" + phoneNumber, otp }),
+                credentials: 'include'
+            });
+
+            const data = await res.json();
+            console.log("data: ", data)
+            if (!res.ok) {
+                toast.error(data.message)
+                setError(data.message)
+                return
+            }
+            console.log("after login: ", data.user)
+            dispatch(addUser(data.user));
+            // Redirect based on role
+            if (data.user.role === 'admin') {
+                navigate('/admin');
+            } else if (data.user.role === 'driver') {
+                navigate('/driver');
+            } else {
+                navigate('/rider');
+            }
+
+        } catch (err) {
+            setError('Network error. Please try again.');
         } finally {
             setLoading(false);
         }
     };
 
     return (
-        <div className="login-page">
-            <div className="login-container">
-                <div className="login-card">
-                    <div className="login-header">
-                        <div className="logo-small">
-                            <svg width="50" height="50" viewBox="0 0 24 24" fill="none">
-                                <path d="M5 17h-.8C3.5 17 3 16.5 3 15.8V13c0-.6.4-1 1-1h1V7c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2v5h1c.6 0 1 .4 1 1v2.8c0 .7-.5 1.2-1.2 1.2H19" 
-                                    stroke="#ffc107" strokeWidth="2" strokeLinecap="round"/>
-                                <circle cx="7" cy="17" r="2" stroke="#ffc107" strokeWidth="2"/>
-                                <circle cx="17" cy="17" r="2" stroke="#ffc107" strokeWidth="2"/>
-                            </svg>
-                        </div>
-                        <h2>Welcome Back</h2>
-                        <p className="subtitle">Login to continue your journey</p>
-                    </div>
-
-                    {error && (
-                        <div className="error-message">
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                                <circle cx="12" cy="12" r="10"/>
-                                <line x1="12" y1="8" x2="12" y2="12"/>
-                                <line x1="12" y1="16" x2="12.01" y2="16"/>
-                            </svg>
-                            {error}
-                        </div>
-                    )}
-
-                    <form onSubmit={handleSubmit} className="login-form">
-                        <div className="form-group">
-                            <label htmlFor="email">EmailId</label>
-                            <input
-                                id="email"
-                                type="email"
-                                name="email"
-                                placeholder="Enter your email"
-                                value={emailId}
-                                onChange={(e) => setEmailId(e.target.value)}
-                                required
-                            />
-                        </div>
-
-                        <div className="form-group">
-                            <label htmlFor="password">Password</label>
-                            <input
-                                id="password"
-                                type="password"
-                                name="password"
-                                placeholder="Enter your password"
-                                value={password}
-                                onChange={(e) => setPassword(e.target.value)}
-                                required
-                            />
-                        </div>
-
-                        <button type="submit" className="login-btn" disabled={loading}>
-                            {loading ? "Logging in..." : "Login"}
-                        </button>
-                    </form>
-
-                    <div className="login-footer">
-                        <p>
-                            Don't have an account?{" "}
-                            <span onClick={() => navigate("/signup")} className="link">
-                                Sign Up
-                            </span>
-                        </p>
-                    </div>
+        <div className="auth-container">
+            <div className="auth-card">
+                <div className="auth-header">
+                    <svg width="48" height="48" viewBox="0 0 24 24" fill="none" className="auth-logo">
+                        <path d="M5 17h-.8C3.5 17 3 16.5 3 15.8V13c0-.6.4-1 1-1h1V7c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2v5h1c.6 0 1 .4 1 1v2.8c0 .7-.5 1.2-1.2 1.2H19"
+                            stroke="#667eea" strokeWidth="2" strokeLinecap="round" />
+                        <circle cx="7" cy="17" r="2" stroke="#667eea" strokeWidth="2" />
+                        <circle cx="17" cy="17" r="2" stroke="#667eea" strokeWidth="2" />
+                    </svg>
+                    <h1>Welcome Back</h1>
+                    <p>Login to continue your ride</p>
                 </div>
-            </div>
 
-            <div className="decorative-shapes">
-                <div className="shape shape-1"></div>
-                <div className="shape shape-2"></div>
+                {error && (
+                    <div className="auth-error">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                            <circle cx="12" cy="12" r="10" />
+                            <line x1="12" y1="8" x2="12" y2="12" />
+                            <line x1="12" y1="16" x2="12.01" y2="16" />
+                        </svg>
+                        <span>{error}</span>
+                    </div>
+                )}
+
+                {!otpSent ? (
+                    <div className="auth-form">
+                        <div className="form-group">
+                            <label htmlFor="phone">Phone Number</label>
+                            <div className="phone-input">
+                                <span className="country-code">+91</span>
+                                <input
+                                    type="tel"
+                                    id="phoneNumber"
+                                    value={phoneNumber}
+                                    onChange={(e) => setPhoneNumber(e.target.value.replace(/\D/g, '').slice(0, 10))}
+                                    placeholder="Enter 10-digit number"
+                                    required
+                                    disabled={loading}
+                                />
+                            </div>
+                        </div>
+
+                        <button onClick={handleSendOTP} className="auth-button" disabled={loading}>
+                            {loading ? (
+                                <span className="loading-spinner"></span>
+                            ) : (
+                                'Send OTP'
+                            )}
+                        </button>
+                    </div>
+                ) : (
+                    <div className="auth-form">
+                        <div className="form-group">
+                            <label htmlFor="otp">Enter OTP</label>
+                            <input
+                                type="text"
+                                id="otp"
+                                value={otp}
+                                onChange={(e) => setOtp(e.target.value.replace(/\D/g, '').slice(0, 6))}
+                                placeholder="6-digit OTP"
+                                required
+                                disabled={loading}
+                                className="otp-input"
+                            />
+                            <p className="otp-hint">OTP sent to +91 {phoneNumber}</p>
+                        </div>
+
+                        <button onClick={handleVerifyOTP} className="auth-button" disabled={loading}>
+                            {loading ? (
+                                <span className="loading-spinner"></span>
+                            ) : (
+                                'Verify & Login'
+                            )}
+                        </button>
+
+                        <button
+                            onClick={() => {
+                                setOtpSent(false);
+                                setOtp('');
+                                setError('');
+                            }}
+                            className="auth-button-secondary"
+                            disabled={loading}
+                        >
+                            Change Number
+                        </button>
+                    </div>
+                )}
+
+                <div className="auth-footer">
+                    <p>Don't have an account?</p>
+                    <Link to="/signup" className="auth-link">Sign Up</Link>
+                </div>
             </div>
         </div>
     );
-}
+};
+
+export default Login;

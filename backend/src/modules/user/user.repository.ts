@@ -1,6 +1,6 @@
 import { BadRequestException, Injectable, NotFoundException } from "@nestjs/common";
 import { InjectModel } from "@nestjs/mongoose";
-import { Model } from "mongoose";
+import { Model, Types } from "mongoose";
 import * as bcrypt from 'bcrypt'
 import { OTP, OTPDocument } from "src/schema/otp.schema";
 import { MailerService } from "@nestjs-modules/mailer";
@@ -10,6 +10,7 @@ import { Role } from "src/enum/role.enum";
 import { LocationDTO } from "src/dto/location.dto";
 import { CommonService } from "../common/common.service";
 import { User, UserDocument } from "src/schema/user.schema";
+import { Rating, RatingDocument } from "src/schema/rating.schema";
 
 @Injectable()
 export class UserRepository {
@@ -20,6 +21,7 @@ export class UserRepository {
         private commonService: CommonService,
         @InjectModel(User.name) private userSchema: Model<UserDocument>,
         @InjectModel(OTP.name) private otpSchema: Model<OTPDocument>,
+        @InjectModel(Rating.name) private ratingSchema: Model<RatingDocument>,
     ) { }
 
     async getProfile(user: any) {
@@ -37,45 +39,45 @@ export class UserRepository {
 
     }
 
-    async updatePassword(user: any, password: string, newPassword: string, confirmNewPassword: string) {
-        try {
+    // async updatePassword(user: any, password: string, newPassword: string, confirmNewPassword: string) {
+    //     try {
 
-            const loggedInUser = await this.userSchema.findById(user.sub)
-            if (!loggedInUser) {
-                throw new NotFoundException('Login again')
-            }
+    //         const loggedInUser = await this.userSchema.findById(user.sub)
+    //         if (!loggedInUser) {
+    //             throw new NotFoundException('Login again')
+    //         }
 
-            if (!newPassword && !confirmNewPassword && !password) {
-                throw new BadRequestException('All fields are required')
-            }
+    //         if (!newPassword && !confirmNewPassword && !password) {
+    //             throw new BadRequestException('All fields are required')
+    //         }
 
-            if (newPassword !== confirmNewPassword) {
-                throw new BadRequestException('Passwords do not match')
-            }
+    //         if (newPassword !== confirmNewPassword) {
+    //             throw new BadRequestException('Passwords do not match')
+    //         }
 
-            const isMatch = await bcrypt.compare(password, loggedInUser.password)
-            if (!isMatch) {
-                throw new BadRequestException('Old password is incorrect')
-            }
-            const isMatchSame = await bcrypt.compare(newPassword, loggedInUser.password)
-            if (isMatchSame) {
-                throw new BadRequestException('New password cannot be same as old password')
-            }
+    //         const isMatch = await bcrypt.compare(password, loggedInUser.password)
+    //         if (!isMatch) {
+    //             throw new BadRequestException('Old password is incorrect')
+    //         }
+    //         const isMatchSame = await bcrypt.compare(newPassword, loggedInUser.password)
+    //         if (isMatchSame) {
+    //             throw new BadRequestException('New password cannot be same as old password')
+    //         }
 
-            const hashedPass = await bcrypt.hash(newPassword, 10);
-            loggedInUser.password = hashedPass
+    //         const hashedPass = await bcrypt.hash(newPassword, 10);
+    //         loggedInUser.password = hashedPass
 
-            await loggedInUser.save();
-            return {
-                message: "Password updated successfully",
-                loggedInUser
-            }
+    //         await loggedInUser.save();
+    //         return {
+    //             message: "Password updated successfully",
+    //             loggedInUser
+    //         }
 
-        } catch (error) {
-            console.log("error in updatePassword: ", error)
-            throw error
-        }
-    }
+    //     } catch (error) {
+    //         console.log("error in updatePassword: ", error)
+    //         throw error
+    //     }
+    // }
 
     async updateProfile(user: any, dto: UpdateUserDTO) {
         try {
@@ -138,19 +140,19 @@ export class UserRepository {
     }
 
 
-    async fetchAllDrivers() {
-        const drivers = await this.userSchema.find(
-            { isVerified: true, role: Role.Driver }
-        ).select('firstName image lastName drivingExperience emailId phoneNumber age vehicle.vehicleName vehicle.vehicleNumber vehicle.vehicleType vehicle.vehicleColor vehicle.vehicleImage')
+    // async fetchAllDrivers() {
+    //     const drivers = await this.userSchema.find(
+    //         { isVerified: true, role: Role.Driver }
+    //     ).select('firstName image lastName drivingExperience emailId phoneNumber age vehicle.vehicleName vehicle.vehicleNumber vehicle.vehicleType vehicle.vehicleColor vehicle.vehicleImage')
 
-        if (drivers.length === 0) {
-            return {
-                message: "No verified drivers found"
-            }
-        }
+    //     if (drivers.length === 0) {
+    //         return {
+    //             message: "No verified drivers found"
+    //         }
+    //     }
 
-        return drivers
-    }
+    //     return drivers
+    // }
 
     async updateCurrentLocation(user: any, dto: LocationDTO) {
         try {
@@ -175,4 +177,34 @@ export class UserRepository {
             throw error
         }
     }
+
+    async getRatings(user: any) {
+        try {
+            const ratings = await this.userSchema.aggregate([
+                { $match: { _id: new Types.ObjectId(user.sub) } },
+                {
+                    $lookup: {
+                        from: "ratings",
+                        localField: 'ratings',
+                        foreignField: '_id',
+                        as: 'ratingDetails'
+                    }
+                },
+                {
+                    $project: {
+                        _id: 1,
+                        totalRatings: { $size: '$ratingDetails' },
+                        averageRating: { $avg: '$ratingDetails.overallRating' }
+                    }
+                }
+            ])
+            console.log("ratings: ", ratings)
+
+            return ratings[0]
+        } catch (error) {
+            console.log("error in getRatings: ", error)
+            throw error
+        }
+    }
+
 }

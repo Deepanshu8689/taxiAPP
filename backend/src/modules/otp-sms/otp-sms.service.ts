@@ -124,7 +124,7 @@ export class OtpSmsService {
     }
 
     // for user and driver
-    async sendOtpSms(user: any) {
+    async sendOtpSms(phoneNumber: string) {
         try {
             const generatedOtp = otpGenerator.generate(6, {
                 upperCaseAlphabets: false,
@@ -133,16 +133,15 @@ export class OtpSmsService {
                 lowerCaseAlphabets: false,
             })
             // console.log("otp: ", generatedOtp)
+            
+            // const body = `Your OTP is ${generatedOtp}. It will expire in 2 minutes.`;
+            // await this.sendSms(phoneNumber, body);
 
             const savedOtp = await this.otpSchema.create({
-                emailId: user.emailId,
+                phoneNumber,
                 otp: generatedOtp,
                 expiresAt: new Date(Date.now() + 2 * 60 * 1000)
             })
-
-            const body = `Your OTP is ${generatedOtp}. It will expire in 2 minutes.`;
-
-            await this.sendSms(user.phoneNumber, body);
 
             return {
                 message: `Otp sent on sms: ${generatedOtp}`,
@@ -156,35 +155,19 @@ export class OtpSmsService {
 
     }
 
-    async verifyPhone(user: any, sms: string) {
+    async verifyPhone(phoneNumber: any, sms: string) {
         try {
-
-            const emailId = user.emailId
-
-            const latestOtp = await this.otpSchema.findOne({ emailId }).sort({ createdAt: -1 });
+            console.log("phoneNumber: ", phoneNumber)
+            const latestOtp = await this.otpSchema.findOne({ phoneNumber }).sort({ createdAt: -1 });
             if (!latestOtp) {
                 throw new NotFoundException('Otp not found')
             }
+            console.log("latestOtp: ", latestOtp)
+            if (latestOtp.expiresAt < new Date()) {throw new BadRequestException('OTP expired');}
+            if (latestOtp.otp !== sms) {throw new BadRequestException('Invalid OTP');}
 
-            if (latestOtp.expiresAt < new Date()) throw new BadRequestException('OTP expired');
-            if (latestOtp.otp !== sms) throw new BadRequestException('Invalid OTP');
-
-            const body = `Your phone number: ${user.phoneNumber} is verified, login and enjoy!`;
-            await this.sendSms(user.phoneNumber, body)
-
-            await this.mailerService.sendMail({
-                to: emailId,
-                subject: 'Phone Number Verified',
-                text: `Your number: ${user.phoneNumber} is verified, login and enjoy!`,
-                html: `Your number: ${user.phoneNumber} is verified, login and enjoy!`
-            })
-
-            // update driver's phone number aND mark verified
-            await this.userSchema.findOneAndUpdate(
-                { emailId },
-                { isPhoneVerified: true },
-                { new: true }
-            )
+            // const body = `Your phone number: ${phoneNumber} is verified, login and enjoy!`;
+            // await this.sendSms(phoneNumber, body)
 
             return {
                 message: `Phone Number Verified Successfully`,

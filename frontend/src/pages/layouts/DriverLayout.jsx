@@ -1,4 +1,4 @@
-import { Outlet, NavLink, useNavigate } from 'react-router-dom'
+import { Outlet, NavLink, useNavigate, useLocation } from 'react-router-dom'
 import { useDispatch, useSelector } from 'react-redux'
 import '../../styles/driver/driverLayout.css'
 import { removeUser } from '../../utils/Redux/userSlice'
@@ -7,6 +7,9 @@ const DriverLayout = () => {
   const user = useSelector((store) => store.user)
   const dispatch = useDispatch()
   const navigate = useNavigate()
+  const location = useLocation()
+
+  const isVerified = user?.isVerified === true
 
   const handleLogout = async () => {
     try {
@@ -18,6 +21,14 @@ const DriverLayout = () => {
       navigate('/')
     } catch (error) {
       console.error("Logout error:", error)
+    }
+  }
+
+  const handleNavClick = (e, path) => {
+    // If driver is not verified and trying to access restricted pages
+    if (!isVerified && path !== '/driver/profile') {
+      e.preventDefault()
+      alert('Please complete your profile verification to access this feature')
     }
   }
 
@@ -40,8 +51,40 @@ const DriverLayout = () => {
             {user?.firstName?.charAt(0)}
           </div>
           <span className="user-name">{user?.firstName}</span>
+          {!isVerified && (
+            <span className="verification-badge pending">Pending</span>
+          )}
         </div>
       </nav>
+
+      {/* Verification Alert Banner */}
+      {!isVerified && location.pathname === '/driver/profile' && (
+        <div className="verification-alert">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+            <circle cx="12" cy="12" r="10" />
+            <line x1="12" y1="8" x2="12" y2="12" />
+            <line x1="12" y1="16" x2="12.01" y2="16" />
+          </svg>
+          <div>
+            <strong>Profile Verification Required</strong>
+            <p>Complete your profile and submit documents to start accepting rides</p>
+          </div>
+        </div>
+      )}
+
+      {!isVerified && location.pathname !== '/driver/profile' && (
+        <div className="verification-alert error">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+            <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" />
+            <line x1="12" y1="9" x2="12" y2="13" />
+            <line x1="12" y1="17" x2="12.01" y2="17" />
+          </svg>
+          <div>
+            <strong>Access Restricted</strong>
+            <p>Complete your profile verification to access this feature</p>
+          </div>
+        </div>
+      )}
 
       {/* Main Content */}
       <div className="layout-content">
@@ -50,28 +93,43 @@ const DriverLayout = () => {
 
       {/* Bottom Navigation */}
       <nav className="bottom-nav driver-bottom-nav">
-        <NavLink to="/driver/home" className="nav-item">
+        <NavLink 
+          to="/driver/home" 
+          className={`nav-item ${!isVerified ? 'disabled' : ''}`}
+          onClick={(e) => handleNavClick(e, '/driver/home')}
+        >
           <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
             <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
             <polyline points="9 22 9 12 15 12 15 22" />
           </svg>
           <span>Home</span>
+          {!isVerified && <span className="lock-icon">🔒</span>}
         </NavLink>
 
-        <NavLink to="/driver/earnings" className="nav-item">
+        <NavLink 
+          to="/driver/earnings" 
+          className={`nav-item ${!isVerified ? 'disabled' : ''}`}
+          onClick={(e) => handleNavClick(e, '/driver/earnings')}
+        >
           <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
             <line x1="12" y1="1" x2="12" y2="23" />
             <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
           </svg>
           <span>Earnings</span>
+          {!isVerified && <span className="lock-icon">🔒</span>}
         </NavLink>
 
-        <NavLink to="/driver/history" className="nav-item">
+        <NavLink 
+          to="/driver/history" 
+          className={`nav-item ${!isVerified ? 'disabled' : ''}`}
+          onClick={(e) => handleNavClick(e, '/driver/history')}
+        >
           <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
             <circle cx="12" cy="12" r="10" />
             <polyline points="12 6 12 12 16 14" />
           </svg>
           <span>History</span>
+          {!isVerified && <span className="lock-icon">🔒</span>}
         </NavLink>
 
         <NavLink to="/driver/profile" className="nav-item">
@@ -80,13 +138,19 @@ const DriverLayout = () => {
             <circle cx="12" cy="7" r="4" />
           </svg>
           <span>Profile</span>
+          {!isVerified && <span className="alert-dot"></span>}
         </NavLink>
 
-        <NavLink to="/driver/support" className="nav-item">
+        <NavLink 
+          to="/driver/support" 
+          className={`nav-item ${!isVerified ? 'disabled' : ''}`}
+          onClick={(e) => handleNavClick(e, '/driver/support')}
+        >
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
             <path d="M12 1a10 10 0 0 0-10 10v3a4 4 0 0 0 4 4h1v-6H6a1 1 0 0 1-1-1v-1a7 7 0 0 1 14 0v1a1 1 0 0 1-1 1h-1v6h1a4 4 0 0 0 4-4v-3A10 10 0 0 0 12 1z" />
           </svg>
-          <span>Customer Support</span>
+          <span>Support</span>
+          {!isVerified && <span className="lock-icon">🔒</span>}
         </NavLink>
 
         <button onClick={handleLogout} className="nav-item">

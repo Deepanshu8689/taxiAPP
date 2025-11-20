@@ -12,12 +12,14 @@ import { OtpSmsModule } from '../otp-sms/otp-sms.module';
 import { CommonService } from '../common/common.service';
 import { User, UserSchema } from 'src/schema/user.schema';
 import { CloudinaryService } from '../cloudinary/cloudinary.service';
+import { Rating, RatingSchema } from 'src/schema/rating.schema';
 
 @Module({
   imports: [
     MongooseModule.forFeature([
       { name: User.name, schema: UserSchema },
       { name: OTP.name, schema: OtpSchema },
+      { name: Rating.name, schema: RatingSchema },
     ]),
     JwtModule.registerAsync({
       inject: [ConfigService],
